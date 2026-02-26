@@ -52,14 +52,22 @@ class CSVLoader:
             FileNotFoundError: If no CSV files are found for the given pair/timeframe.
             ValueError: If required columns are missing in the CSV files.
         """
+        # Support two layouts:
+        #   1. data/raw/{pair}/{timeframe}/*.csv  (directory with one or more CSVs)
+        #   2. data/raw/{pair}/{timeframe}.csv    (single flat file)
         directory = self._data_dir / pair / timeframe
-        csv_files = sorted(directory.glob("*.csv"))
+        csv_files = sorted(directory.glob("*.csv")) if directory.is_dir() else []
 
         if not csv_files:
-            raise FileNotFoundError(
-                f"No CSV files found in {directory}. "
-                f"Expected: data/raw/{pair}/{timeframe}/*.csv"
-            )
+            flat_file = self._data_dir / pair / f"{timeframe}.csv"
+            if flat_file.is_file():
+                csv_files = [flat_file]
+            else:
+                raise FileNotFoundError(
+                    f"No CSV data found for {pair}/{timeframe}. "
+                    f"Expected: data/raw/{pair}/{timeframe}/*.csv "
+                    f"or data/raw/{pair}/{timeframe}.csv"
+                )
 
         frames: list[pd.DataFrame] = []
         for path in csv_files:

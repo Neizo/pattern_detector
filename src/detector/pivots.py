@@ -7,12 +7,12 @@ range queries via bisect.
 
 import bisect
 import logging
-from dataclasses import dataclass, field
-from datetime import datetime
 
 import numpy as np
 import pandas as pd
 from scipy.signal import find_peaks
+
+from src.models import Pivot
 
 logger = logging.getLogger(__name__)
 
@@ -22,27 +22,6 @@ _SCALES: dict[str, tuple[int, int]] = {
     "medium": (5, 5),
     "major":  (10, 10),
 }
-
-
-@dataclass
-class Pivot:
-    """A single swing high or swing low point.
-
-    Attributes:
-        index: Integer position in the source DataFrame.
-        timestamp: Candle timestamp.
-        price: High for swing_high, low for swing_low.
-        pivot_type: "swing_high" or "swing_low".
-        strength: Number of scales where detected (1=minor, 2=medium, 3=major).
-        prominence: Peak prominence in price units (scipy find_peaks).
-    """
-
-    index: int
-    timestamp: datetime
-    price: float
-    pivot_type: str
-    strength: int
-    prominence: float
 
 
 class PivotStore:

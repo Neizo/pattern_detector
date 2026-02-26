@@ -19,7 +19,8 @@ import pandas as pd
 from src.config import DEFAULT_CONFIG
 from src.loader import CSVLoader
 from src.enricher import Enricher
-from src.detector.pivots import PivotDetector, Pivot
+from src.models import PatternResult, Pivot
+from src.detector.pivots import PivotDetector
 from src.detector.levels import LevelDetector
 from src.detector.trendlines import TrendlineDetector
 from src.detector.patterns import (
@@ -30,7 +31,6 @@ from src.detector.patterns import (
     ConsolidationDetector,
 )
 from src.renderer import ChartRenderer
-from src.models import PatternResult
 
 logger = logging.getLogger(__name__)
 
@@ -158,7 +158,8 @@ class Pipeline:
             win_end = current_pivot.index
 
             levels = self._level_detector.detect(
-                df, pivot_store, current_pivot, win_start, win_end
+                df, pivot_store, current_pivot, win_start, win_end,
+                pair=pair, timeframe=timeframe,
             )
             trendlines = self._trendline_detector.detect(
                 df, pivot_store, current_pivot, win_start, win_end
