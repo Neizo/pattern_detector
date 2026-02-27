@@ -583,17 +583,26 @@ class AnnotationManager {
   }
 
   /**
-   * Load annotations from a saved payload and redraw everything.
+   * Clear all annotations and reset state.
    */
-  loadFromPayload(data) {
-    if (!data || !data.annotations) return;
-
-    // Clear existing
+  clear() {
     this.chart.clearAllLevelZones();
     this.chart.clearAllTrendlines();
     this.chart.setPivotMarkers([]);
     this.annotations = { levels: [], trendlines: [], pivots: [], patterns: [] };
     this._labelCounters = { S: 0, R: 0 };
+    this.dirty = false;
+    this._hideForm();
+    this._updateUI();
+  }
+
+  /**
+   * Load annotations from a saved payload and redraw everything.
+   */
+  loadFromPayload(data) {
+    this.clear();
+
+    if (!data || !data.annotations) return;
 
     const ann = data.annotations;
 

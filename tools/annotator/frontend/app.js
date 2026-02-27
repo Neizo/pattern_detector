@@ -136,6 +136,9 @@
   // ── Annotations persistence ─────────────────────────────────────────
 
   async function loadExistingAnnotations(pair, tf) {
+    // Clear previous annotations before loading new pair/timeframe
+    annotationManager.clear();
+
     try {
       const resp = await fetch(`/api/annotations?pair=${pair}&timeframe=${tf}`);
       const data = await resp.json();
