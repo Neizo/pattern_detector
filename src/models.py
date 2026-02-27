@@ -69,6 +69,10 @@ class Pivot:
         pivot_type: "swing_high" or "swing_low".
         strength: Number of detection scales (1=minor, 2=medium, 3=major).
         prominence: Peak prominence in price units (from scipy find_peaks).
+        detection_index: DataFrame index at which this pivot is fully
+            confirmed (= index + max right_bars across detecting scales).
+            The chart should be rendered up to this index, not the pivot index,
+            because the pivot is only known after right_bars candles.
     """
 
     index: int
@@ -77,3 +81,4 @@ class Pivot:
     pivot_type: str
     strength: int
     prominence: float
+    detection_index: int = 0

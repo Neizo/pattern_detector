@@ -123,7 +123,7 @@ class ChartRenderer:
         # mplfinance only accepts OHLCV columns
         df_slice = df.iloc[ws:we][["open", "high", "low", "close", "volume"]].copy()
 
-        out_dir = OUTPUT_ROOT / result.pattern_type.value
+        out_dir = OUTPUT_ROOT / result.pattern_type.value / result.pair / result.timeframe
         out_dir.mkdir(parents=True, exist_ok=True)
         ts_str = result.timestamp_detected.isoformat().replace(":", "-")
         out_path = out_dir / f"{result.pair}_{result.timeframe}_{ts_str}.png"
@@ -301,22 +301,31 @@ class ChartRenderer:
     def _draw_hlines(self, ax: plt.Axes, result: PatternResult) -> None:
         """Draw horizontal price levels across the full chart width.
 
+        Lines whose price falls inside a zone (ymin ≤ price ≤ ymax) are
+        skipped, since the zone already conveys the level visually.
+
         Args:
             ax: mplfinance price axis.
             result: PatternResult with annotations["hlines"].
         """
+        zones = result.annotations.get("zones", [])
         for hline in result.annotations.get("hlines", []):
+            price = hline["price"]
             color = hline.get("color", _C["hline"])
-            ax.axhline(
-                y=hline["price"],
-                color=color,
-                linewidth=hline.get("width", 1.0),
-                linestyle="--",
-                alpha=0.8,
-            )
+            # Skip the dashed line if a zone already covers this price
+            in_zone = any(z["ymin"] <= price <= z["ymax"] for z in zones)
+            if not in_zone:
+                ax.axhline(
+                    y=price,
+                    color=color,
+                    linewidth=hline.get("width", 1.0),
+                    linestyle="--",
+                    alpha=0.8,
+                )
+            # Always draw the label (zone or not)
             if "label" in hline:
                 ax.text(
-                    0.01, hline["price"], hline["label"],
+                    0.01, price, hline["label"],
                     transform=ax.get_yaxis_transform(),
                     color=color, fontsize=9, va="bottom", alpha=0.9,
                 )
@@ -324,13 +333,30 @@ class ChartRenderer:
     def _draw_zones(self, ax: plt.Axes, result: PatternResult) -> None:
         """Draw semi-transparent horizontal price bands.
 
+        If a zone dict contains ``x_start_idx`` (absolute DataFrame index),
+        the band starts at that candle position instead of the chart origin.
+        The band always extends to the right edge of the chart.
+
         Args:
             ax: mplfinance price axis.
             result: PatternResult with annotations["zones"].
         """
+        ws = result.window_start_index
+        n = result.window_end_index - ws + 1
         for zone in result.annotations.get("zones", []):
-            ax.axhspan(
-                zone["ymin"], zone["ymax"],
-                color=zone.get("color", _C["zone"]),
-                alpha=zone.get("alpha", 0.12),
-            )
+            color = zone.get("color", _C["zone"])
+            alpha = zone.get("alpha", 0.12)
+            if "x_start_idx" in zone:
+                # Convert absolute DataFrame index → positional x in slice
+                x_start = max(0, zone["x_start_idx"] - ws)
+                # Use data coordinates so the zone aligns with candles
+                ax.fill_between(
+                    [x_start, n - 1],
+                    zone["ymin"], zone["ymax"],
+                    color=color, alpha=alpha,
+                )
+            else:
+                ax.axhspan(
+                    zone["ymin"], zone["ymax"],
+                    color=color, alpha=alpha,
+                )

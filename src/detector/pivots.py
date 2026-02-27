@@ -161,6 +161,11 @@ class PivotDetector:
         low_votes: dict[int, int] = {}
         high_prominence: dict[int, float] = {}
         low_prominence: dict[int, float] = {}
+        # Track the largest right_bars across scales that detected each pivot.
+        # The pivot is fully confirmed only when all detecting scales have seen
+        # enough bars, so we use the max right_bars.
+        high_max_right: dict[int, int] = {}
+        low_max_right: dict[int, int] = {}
 
         for scale, (left, right) in _SCALES.items():
             distance = left + right
@@ -173,9 +178,13 @@ class PivotDetector:
                 prominence=min_prominence,
             )
             for idx, prom in zip(peaks_h, props_h["prominences"]):
-                high_votes[int(idx)] = high_votes.get(int(idx), 0) + 1
-                high_prominence[int(idx)] = max(
-                    high_prominence.get(int(idx), 0.0), float(prom)
+                int_idx = int(idx)
+                high_votes[int_idx] = high_votes.get(int_idx, 0) + 1
+                high_prominence[int_idx] = max(
+                    high_prominence.get(int_idx, 0.0), float(prom)
+                )
+                high_max_right[int_idx] = max(
+                    high_max_right.get(int_idx, 0), right
                 )
 
             # Swing lows (invert signal)
@@ -185,11 +194,16 @@ class PivotDetector:
                 prominence=min_prominence,
             )
             for idx, prom in zip(peaks_l, props_l["prominences"]):
-                low_votes[int(idx)] = low_votes.get(int(idx), 0) + 1
-                low_prominence[int(idx)] = max(
-                    low_prominence.get(int(idx), 0.0), float(prom)
+                int_idx = int(idx)
+                low_votes[int_idx] = low_votes.get(int_idx, 0) + 1
+                low_prominence[int_idx] = max(
+                    low_prominence.get(int_idx, 0.0), float(prom)
+                )
+                low_max_right[int_idx] = max(
+                    low_max_right.get(int_idx, 0), right
                 )
 
+        n_bars = len(df)
         highs = [
             Pivot(
                 index=idx,
@@ -198,6 +212,7 @@ class PivotDetector:
                 pivot_type="swing_high",
                 strength=votes,
                 prominence=high_prominence[idx],
+                detection_index=min(idx + high_max_right[idx], n_bars - 1),
             )
             for idx, votes in sorted(high_votes.items())
         ]
@@ -210,6 +225,7 @@ class PivotDetector:
                 pivot_type="swing_low",
                 strength=votes,
                 prominence=low_prominence[idx],
+                detection_index=min(idx + low_max_right[idx], n_bars - 1),
             )
             for idx, votes in sorted(low_votes.items())
         ]

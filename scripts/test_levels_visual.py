@@ -1,8 +1,8 @@
-"""Visual validation of S/R level detection on real EURUSD data.
+"""Visual validation of S/R level detection on real forex data.
 
-Generates one annotated candlestick image per timeframe showing the last
-WINDOW candles with all detected support (teal) and resistance (red) levels
-overlaid as horizontal lines and semi-transparent zones.
+Generates one annotated candlestick image per (pair, timeframe) showing the
+last WINDOW candles with all detected support (teal) and resistance (red)
+levels overlaid as horizontal lines and semi-transparent zones.
 
 Detection strategy:
   - Run LevelDetector for every pivot in the visible window
@@ -13,7 +13,8 @@ Detection strategy:
 Usage:
     python scripts/test_levels_visual.py
     python scripts/test_levels_visual.py --window 300
-    python scripts/test_levels_visual.py --timeframes H4 D
+    python scripts/test_levels_visual.py --pair EURUSD --pair GBPJPY
+    python scripts/test_levels_visual.py --pair EURUSD --timeframes H4 D
 """
 
 import argparse
@@ -42,7 +43,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-DATA_ROOT = ROOT / "data" / "raw" / "EURUSD"
+DATA_ROOT = ROOT / "data" / "raw"
 OUTPUT_DIR = ROOT / "output" / "levels_test"
 
 TF_MAP: dict[str, str] = {
@@ -64,6 +65,19 @@ def load_csv(path: Path) -> pd.DataFrame:
     for col in ("open", "high", "low", "close", "volume"):
         df[col] = df[col].astype(float)
     return df
+
+
+def _available_pairs() -> list[str]:
+    """Return sorted list of pair names that have a data directory."""
+    return sorted(p.name for p in DATA_ROOT.iterdir() if p.is_dir())
+
+
+def _available_timeframes(pair: str) -> list[str]:
+    """Return sorted list of CSV stems available for a given pair."""
+    pair_dir = DATA_ROOT / pair
+    if not pair_dir.exists():
+        return []
+    return sorted(p.stem for p in pair_dir.glob("*.csv"))
 
 
 def _deduplicate_levels(
@@ -99,7 +113,14 @@ def _deduplicate_levels(
     return unique
 
 
-def run(timeframes: list[str], window: int) -> None:
+def run(pairs: list[str], timeframes: list[str] | None, window: int) -> None:
+    """Detect levels and render one image per (pair, timeframe).
+
+    Args:
+        pairs: List of forex pair names to process.
+        timeframes: List of CSV filename stems to process, or None for all.
+        window: Number of candles to display in each image.
+    """
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     enricher = Enricher()
@@ -114,121 +135,137 @@ def run(timeframes: list[str], window: int) -> None:
         "render_dpi": 100,
     })
 
-    for tf_stem in timeframes:
-        csv_path = DATA_ROOT / f"{tf_stem}.csv"
-        if not csv_path.exists():
-            logger.warning("File not found: %s — skipping", csv_path)
+    for pair in pairs:
+        pair_dir = DATA_ROOT / pair
+        if not pair_dir.exists():
+            logger.warning("No data directory for %s — skipping", pair)
             continue
 
-        logger.info("Loading %s ...", csv_path.name)
-        df = load_csv(csv_path)
-        logger.info("  %d candles, %s to %s",
-                    len(df), df.index[0].date(), df.index[-1].date())
+        tf_list = timeframes if timeframes else _available_timeframes(pair)
 
-        tf_key = TF_MAP.get(tf_stem, "H4")
-        df = enricher.enrich(df, tf_key)
+        for tf_stem in tf_list:
+            csv_path = pair_dir / f"{tf_stem}.csv"
+            if not csv_path.exists():
+                logger.warning("File not found: %s — skipping", csv_path)
+                continue
 
-        pivot_store = pivot_detector.compute_all(df)
-        logger.info("  %d swing highs, %d swing lows",
-                    len(pivot_store.highs), len(pivot_store.lows))
+            logger.info("[%s] Loading %s ...", pair, csv_path.name)
+            df = load_csv(csv_path)
+            logger.info("  %d candles, %s to %s",
+                        len(df), df.index[0].date(), df.index[-1].date())
 
-        # Rendering window
-        we = len(df) - 1
-        ws = max(0, we - window + 1)
+            tf_key = TF_MAP.get(tf_stem, "H4")
+            df = enricher.enrich(df, tf_key)
 
-        # ATR at window end
-        atr_end = float(df["atr"].iloc[we])
+            pivot_store = pivot_detector.compute_all(df)
+            logger.info("  %d swing highs, %d swing lows",
+                        len(pivot_store.highs), len(pivot_store.lows))
 
-        # Run LevelDetector once with skip_anchor=True to find ALL
-        # significant levels in the window (visual validation mode).
-        window_pivots = pivot_store.in_range(ws, we)
-        if not window_pivots:
-            logger.warning("  No pivots in window — skipping %s", tf_stem)
-            continue
+            # Rendering window
+            we = len(df) - 1
+            ws = max(0, we - window + 1)
 
-        # Use the last pivot as reference for lookback/reaction cap
-        ref_pivot = window_pivots[-1]
-        all_level_results = level_detector.detect(
-            df, pivot_store, ref_pivot,
-            win_start=ws, win_end=we,
-            pair="EURUSD", timeframe=tf_stem,
-            visual_mode=True,
-        )
+            # ATR at window end
+            atr_end = float(df["atr"].iloc[we])
 
-        # Deduplicate
-        unique_levels = _deduplicate_levels(all_level_results, atr_end)
+            # Run LevelDetector once with visual_mode=True to find ALL
+            # significant levels in the window (visual validation mode).
+            window_pivots = pivot_store.in_range(ws, we)
+            if not window_pivots:
+                logger.warning("  No pivots in window — skipping %s", tf_stem)
+                continue
 
-        n_sup = sum(1 for r in unique_levels if r.pattern_type == PatternType.SUPPORT)
-        n_res = sum(1 for r in unique_levels if r.pattern_type == PatternType.RESISTANCE)
-        logger.info(
-            "  Window [%d:%d] — %d unique levels (%d support, %d resistance)",
-            ws, we, len(unique_levels), n_sup, n_res,
-        )
+            # Use the last pivot as reference for lookback/reaction cap
+            ref_pivot = window_pivots[-1]
+            all_level_results = level_detector.detect(
+                df, pivot_store, ref_pivot,
+                win_start=ws, win_end=we,
+                pair=pair, timeframe=tf_stem,
+                visual_mode=True,
+            )
 
-        # Build key_points from pivots (same as test_pivots_visual.py)
-        key_points = [
-            {"label": p.pivot_type, "index": p.index, "price": p.price,
-             "strength": p.strength}
-            for p in window_pivots
-        ]
+            # Deduplicate
+            unique_levels = _deduplicate_levels(all_level_results, atr_end)
 
-        # Merge annotations from all unique levels
-        merged_hlines = []
-        merged_zones = []
-        for lvl in unique_levels:
-            merged_hlines.extend(lvl.annotations.get("hlines", []))
-            merged_zones.extend(lvl.annotations.get("zones", []))
+            n_sup = sum(1 for r in unique_levels if r.pattern_type == PatternType.SUPPORT)
+            n_res = sum(1 for r in unique_levels if r.pattern_type == PatternType.RESISTANCE)
+            logger.info(
+                "  Window [%d:%d] — %d unique levels (%d support, %d resistance)",
+                ws, we, len(unique_levels), n_sup, n_res,
+            )
 
-        result = PatternResult(
-            pattern_type=PatternType.SUPPORT,  # category label only
-            pair="EURUSD",
-            timeframe=tf_stem,
-            timestamp_detected=df.index[we].to_pydatetime(),
-            start_index=ws,
-            end_index=we,
-            confidence=1.0,
-            key_points=key_points,
-            atr_at_detection=atr_end,
-            window_start_index=ws,
-            window_end_index=we,
-            annotations={"hlines": merged_hlines, "zones": merged_zones},
-        )
+            # Build key_points from pivots
+            key_points = [
+                {"label": p.pivot_type, "index": p.index, "price": p.price,
+                 "strength": p.strength}
+                for p in window_pivots
+            ]
 
-        # Override OUTPUT_ROOT so images land in levels_test/
-        from src.renderer import chart_renderer as _cm
-        _orig = _cm.OUTPUT_ROOT
-        _cm.OUTPUT_ROOT = OUTPUT_DIR
-        try:
-            path = renderer.render(df, result)
-        finally:
-            _cm.OUTPUT_ROOT = _orig
+            # Merge annotations from all unique levels
+            merged_hlines = []
+            merged_zones = []
+            for lvl in unique_levels:
+                merged_hlines.extend(lvl.annotations.get("hlines", []))
+                merged_zones.extend(lvl.annotations.get("zones", []))
 
-        dest = OUTPUT_DIR / f"EURUSD_{tf_stem}_levels_last{window}.png"
-        if path.exists() and path != dest:
-            path.replace(dest)
-            path = dest
+            result = PatternResult(
+                pattern_type=PatternType.SUPPORT,  # category label only
+                pair=pair,
+                timeframe=tf_stem,
+                timestamp_detected=df.index[we].to_pydatetime(),
+                start_index=ws,
+                end_index=we,
+                confidence=1.0,
+                key_points=key_points,
+                atr_at_detection=atr_end,
+                window_start_index=ws,
+                window_end_index=we,
+                annotations={"hlines": merged_hlines, "zones": merged_zones},
+            )
 
-        logger.info("  Saved -> %s", path.name)
+            # Override OUTPUT_ROOT so images land in levels_test/
+            from src.renderer import chart_renderer as _cm
+            _orig = _cm.OUTPUT_ROOT
+            _cm.OUTPUT_ROOT = OUTPUT_DIR
+            try:
+                path = renderer.render(df, result)
+            finally:
+                _cm.OUTPUT_ROOT = _orig
+
+            dest = OUTPUT_DIR / f"{pair}_{tf_stem}_levels_last{window}.png"
+            if path.exists() and path != dest:
+                path.replace(dest)
+                path = dest
+
+            logger.info("  Saved -> %s", path.name)
 
     logger.info("Done. Images in: %s", OUTPUT_DIR)
 
 
 def _parse_args() -> argparse.Namespace:
-    available = sorted(p.stem for p in DATA_ROOT.glob("*.csv"))
+    all_pairs = _available_pairs()
     parser = argparse.ArgumentParser(
-        description="Visual S/R level detection test on EURUSD data"
+        description="Visual S/R level detection test on forex data"
     )
     parser.add_argument(
-        "--timeframes", nargs="+", default=available, metavar="TF",
-        help=f"Timeframes to process (default: all found). Available: {available}",
+        "--pair", action="append", dest="pairs", metavar="PAIR",
+        help=f"Forex pair(s) to process (repeatable). Available: {all_pairs}. "
+             "Default: all pairs with data.",
+    )
+    parser.add_argument(
+        "--timeframes", nargs="+", default=None, metavar="TF",
+        help="Timeframes to process (default: all found for each pair).",
     )
     parser.add_argument(
         "--window", type=int, default=500,
         help="Number of candles to display (default: 500)",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if not args.pairs:
+        args.pairs = all_pairs
+    return args
 
 
 if __name__ == "__main__":
     args = _parse_args()
-    run(args.timeframes, args.window)
+    run(args.pairs, args.timeframes, args.window)

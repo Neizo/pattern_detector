@@ -154,8 +154,8 @@ class Pipeline:
         all_results: list[PatternResult] = []
 
         for current_pivot in all_pivots:
-            win_start = max(0, current_pivot.index - window_size + 1)
-            win_end = current_pivot.index
+            win_end = current_pivot.detection_index
+            win_start = max(0, win_end - window_size + 1)
 
             levels = self._level_detector.detect(
                 df, pivot_store, current_pivot, win_start, win_end,

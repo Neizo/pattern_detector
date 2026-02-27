@@ -8,11 +8,16 @@ Usage:
 
 import argparse
 import logging
+import shutil
 import sys
 from itertools import product
+from pathlib import Path
 
 from src.config import DEFAULT_CONFIG, PAIRS, TIMEFRAMES
+from src.models import PatternType
 from src.pipeline import Pipeline
+
+OUTPUT_ROOT = Path("output")
 
 
 def _setup_logging(level: str = "INFO") -> None:
@@ -77,6 +82,27 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _clean_output(runs: list[tuple[str, str]]) -> None:
+    """Remove previous output images for the pairs/timeframes about to be processed.
+
+    Deletes output/{pattern}/{pair}/{timeframe}/ for every combination in *runs*
+    and every pattern type, so stale images from previous runs don't accumulate.
+
+    Args:
+        runs: List of (pair, timeframe) tuples that will be processed.
+    """
+    logger = logging.getLogger(__name__)
+    removed = 0
+    for pair, timeframe in runs:
+        for pt in PatternType:
+            d = OUTPUT_ROOT / pt.value / pair / timeframe
+            if d.exists():
+                shutil.rmtree(d)
+                removed += 1
+    if removed:
+        logger.info("Cleaned %d output directories", removed)
+
+
 def main() -> None:
     """Entry point: parse arguments and run the pipeline."""
     args = _parse_args()
@@ -96,6 +122,9 @@ def main() -> None:
             )
             sys.exit(1)
         runs = list(product(pairs, timeframes))
+
+    # Clean output directories for the pairs being processed
+    _clean_output(runs)
 
     pipeline = Pipeline(DEFAULT_CONFIG)
     total_images = 0

@@ -109,8 +109,10 @@ class LevelDetector:
             return []
 
         # ── 1. Collect pivots in lookback window ────────────────────────────
+        # Clamp lookback to win_start so we never use pivots outside the
+        # rendering window — avoids zones anchored on invisible touches.
         lookback: int = self._config.get("level_lookback_bars", 600)
-        lb_start = max(0, current_pivot.index - lookback)
+        lb_start = max(win_start, current_pivot.index - lookback)
         context_pivots = pivot_store.in_range(lb_start, win_end)
 
         if len(context_pivots) < _MIN_KDE_PIVOTS:
@@ -237,6 +239,7 @@ class LevelDetector:
                             "ymax": float(level_price + touch_tol),
                             "color": color,
                             "alpha": 0.10,
+                            "x_start_idx": max(touches[0].index, win_start),
                         }
                     ],
                 },

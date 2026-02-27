@@ -86,3 +86,18 @@ def test_pivot_strength_in_range() -> None:
 
     for p in store.all():
         assert 1 <= p.strength <= 3
+
+
+def test_pivot_detection_index() -> None:
+    """detection_index is strictly after the pivot index and within DataFrame bounds."""
+    df = _make_df_with_peaks()
+    store = PivotDetector().compute_all(df)
+    n = len(df)
+
+    for p in store.all():
+        assert p.detection_index > p.index, (
+            f"detection_index ({p.detection_index}) should be > pivot index ({p.index})"
+        )
+        assert p.detection_index < n, (
+            f"detection_index ({p.detection_index}) should be < len(df) ({n})"
+        )

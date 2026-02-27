@@ -16,7 +16,7 @@ DEFAULT_CONFIG: dict = {
     "trendline_min_r_squared": 0.85,
     "trendline_lookback_bars": 600,
     # Rendering
-    "render_candle_window": 501,
+    "render_candle_window": 600,
     "render_min_confidence": 0.5,
     "render_dpi": 100,
     "render_figsize": (19.2, 10.8),
@@ -32,6 +32,7 @@ PAIRS: list[str] = [
     "AUDUSD",
     "NZDUSD",
     "USDCAD",
+    "GBPJPY",
 ]
 
 TIMEFRAMES: list[str] = ["M15", "M30", "H1", "H4", "D1", "W1"]
