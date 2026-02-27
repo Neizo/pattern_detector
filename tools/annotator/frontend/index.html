@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern Detector — Annotator</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lightweight-charts@4.2.2/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <!-- Top bar: data selection -->
+  <header id="topbar">
+    <div class="controls">
+      <label>
+        Paire
+        <select id="sel-pair"></select>
+      </label>
+      <label>
+        Timeframe
+        <select id="sel-tf"></select>
+      </label>
+      <label>
+        Bougies
+        <input type="number" id="inp-lastn" value="500" min="50" max="5000" step="50">
+      </label>
+      <label>
+        Avant
+        <input type="date" id="inp-before" value="2025-12-31">
+      </label>
+      <button id="btn-load">Charger</button>
+    </div>
+    <div class="status">
+      <span id="save-status"></span>
+      <button id="btn-save" disabled>Sauvegarder</button>
+    </div>
+  </header>
+
+  <!-- Main layout: chart + side panel -->
+  <main id="main">
+    <div id="chart-container"></div>
+
+    <aside id="side-panel">
+      <!-- Mode selector -->
+      <div id="mode-bar">
+        <button class="mode-btn active" data-mode="levels">Levels</button>
+        <button class="mode-btn" data-mode="trendlines">Trendlines</button>
+        <button class="mode-btn" data-mode="pivots">Pivots</button>
+        <button class="mode-btn" data-mode="patterns">Patterns</button>
+      </div>
+
+      <!-- Mode-specific instructions -->
+      <div id="mode-instructions">
+        <p id="instr-text">Cliquez-glissez verticalement sur le chart pour tracer une zone S/R.</p>
+      </div>
+
+      <!-- Active annotation form (shown when creating/editing) -->
+      <div id="annotation-form" class="hidden">
+        <!-- Dynamically populated by annotations.js -->
+      </div>
+
+      <!-- Annotation counters -->
+      <div id="annotation-counts">
+        <span class="count-badge" data-type="levels">Levels: <b>0</b></span>
+        <span class="count-badge" data-type="trendlines">Trendlines: <b>0</b></span>
+        <span class="count-badge" data-type="pivots">Pivots: <b>0</b></span>
+        <span class="count-badge" data-type="patterns">Patterns: <b>0</b></span>
+      </div>
+
+      <!-- Annotation list -->
+      <div id="annotation-list"></div>
+    </aside>
+  </main>
+
+  <script src="chart.js"></script>
+  <script src="annotations.js"></script>
+  <script src="comparison.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

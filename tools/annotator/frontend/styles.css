@@ -1,0 +1,306 @@
+/* ── Reset & Base ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #131722;
+  --bg-secondary: #1e222d;
+  --bg-tertiary: #2a2e39;
+  --text-primary: #d1d4dc;
+  --text-secondary: #787b86;
+  --accent-blue: #2962ff;
+  --accent-teal: #26a69a;
+  --accent-red: #ef5350;
+  --accent-orange: #ff9800;
+  --accent-green: #4caf50;
+  --border: #363a45;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 3px; }
+
+/* ── Top Bar ─────────────────────────────────────────────────────────── */
+#topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#topbar .controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+#topbar .status {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#topbar label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+#topbar select,
+#topbar input {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: var(--font);
+}
+
+#topbar input[type="number"] { width: 70px; }
+#topbar input[type="date"] { width: 130px; }
+
+button {
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: opacity 0.15s;
+}
+
+button:hover { opacity: 0.85; }
+button:disabled { opacity: 0.4; cursor: default; }
+
+#save-status {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* ── Main Layout ─────────────────────────────────────────────────────── */
+#main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+#chart-container {
+  flex: 3;
+  position: relative;
+  min-width: 0;
+}
+
+/* ── Side Panel ──────────────────────────────────────────────────────── */
+#side-panel {
+  width: 280px;
+  min-width: 280px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Mode bar */
+#mode-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.mode-btn {
+  flex: 1;
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  border-radius: 0;
+  padding: 8px 4px;
+  font-size: 11px;
+  border-bottom: 2px solid transparent;
+}
+
+.mode-btn.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent-blue);
+}
+
+.mode-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+/* Instructions */
+#mode-instructions {
+  padding: 8px 10px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Annotation form */
+#annotation-form {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#annotation-form.hidden { display: none; }
+
+#annotation-form .form-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+#annotation-form .form-row label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  min-width: 40px;
+}
+
+#annotation-form input[type="text"],
+#annotation-form select {
+  flex: 1;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: var(--font);
+}
+
+#annotation-form .form-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+#annotation-form .btn-validate {
+  background: var(--accent-green);
+  flex: 1;
+}
+
+#annotation-form .btn-delete {
+  background: var(--accent-red);
+  flex: 1;
+}
+
+/* Radio buttons */
+.radio-group {
+  display: flex;
+  gap: 8px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  color: var(--text-primary) !important;
+  font-size: 12px !important;
+}
+
+.radio-group input[type="radio"] {
+  accent-color: var(--accent-blue);
+}
+
+/* Annotation counters */
+#annotation-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.count-badge {
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.count-badge b { color: var(--text-primary); }
+
+/* Annotation list */
+#annotation-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.annotation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  margin-bottom: 3px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.1s;
+}
+
+.annotation-item:hover {
+  background: #363a45;
+}
+
+.annotation-item .label {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.annotation-item .label.support { color: var(--accent-teal); }
+.annotation-item .label.resistance { color: var(--accent-red); }
+.annotation-item .label.pivot-high { color: var(--accent-red); }
+.annotation-item .label.pivot-low { color: var(--accent-teal); }
+.annotation-item .label.trendline { color: var(--accent-blue); }
+.annotation-item .label.pattern { color: var(--accent-orange); }
+
+.annotation-item .info {
+  flex: 1;
+  color: var(--text-secondary);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.annotation-item .btn-remove {
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 2px 4px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.annotation-item .btn-remove:hover { color: var(--accent-red); }
+
+/* ── Utility ─────────────────────────────────────────────────────────── */
+.hidden { display: none !important; }
