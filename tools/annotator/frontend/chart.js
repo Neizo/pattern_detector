@@ -15,6 +15,10 @@ class ChartManager {
     this.candles = [];           // raw candle data from API
     this.lwcCandles = [];        // formatted for lightweight-charts
     this.pricePrecision = 5;     // auto-detected from data
+    this.displayMode = 'candles'; // 'candles' or 'line'
+
+    // Close line series (toggle)
+    this.lineSeries = null;
 
     // Annotation overlays managed externally
     this._levelSeries = [];      // list of { id, areaSeries }
@@ -59,6 +63,15 @@ class ChartManager {
       wickDownColor: '#ef5350',
     });
 
+    this.lineSeries = this.chart.addLineSeries({
+      color: '#d1d4dc',
+      lineWidth: 1,
+      crosshairMarkerVisible: true,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      visible: false,
+    });
+
     // Resize on window resize
     const ro = new ResizeObserver(() => {
       this.chart.applyOptions({
@@ -99,6 +112,11 @@ class ChartManager {
     }));
 
     this.candleSeries.setData(this.lwcCandles);
+
+    // Also feed close-only line series
+    const lineData = this.lwcCandles.map(c => ({ time: c.time, value: c.close }));
+    this.lineSeries.setData(lineData);
+
     this.chart.timeScale().fitContent();
   }
 
@@ -132,6 +150,38 @@ class ChartManager {
    */
   priceToY(price) {
     return this.candleSeries.priceToCoordinate(price);
+  }
+
+  // ── Display mode toggle ──────────────────────────────────────────────
+
+  /**
+   * Switch between 'candles' and 'line' (close only) display.
+   */
+  setDisplayMode(mode) {
+    this.displayMode = mode;
+    const transparent = '#131722';
+    if (mode === 'line') {
+      // Make candles invisible but keep the series active (annotations stay visible)
+      this.candleSeries.applyOptions({
+        upColor: transparent,
+        downColor: transparent,
+        borderUpColor: transparent,
+        borderDownColor: transparent,
+        wickUpColor: transparent,
+        wickDownColor: transparent,
+      });
+      this.lineSeries.applyOptions({ visible: true });
+    } else {
+      this.candleSeries.applyOptions({
+        upColor: '#26a69a',
+        downColor: '#ef5350',
+        borderUpColor: '#26a69a',
+        borderDownColor: '#ef5350',
+        wickUpColor: '#26a69a',
+        wickDownColor: '#ef5350',
+      });
+      this.lineSeries.applyOptions({ visible: false });
+    }
   }
 
   // ── Level zones ──────────────────────────────────────────────────────
@@ -246,11 +296,9 @@ class ChartManager {
 
     const slope = (price2 - price1) / (index2 - index1);
 
-    // Extend to edges of visible data
-    const extStart = 0;
+    // Start at first anchor, extend to the right edge
+    const extStart = Math.min(index1, index2);
     const extEnd = this.lwcCandles.length - 1;
-    const pStart = price1 + slope * (extStart - index1);
-    const pEnd = price1 + slope * (extEnd - index1);
 
     const lineData = [];
     for (let i = extStart; i <= extEnd; i++) {
@@ -318,6 +366,27 @@ class ChartManager {
       const price = this.candleSeries.coordinateToPrice(param.point.y);
       const index = this.getCandleIndexByTime(param.time);
       callback({ index, time: param.time, price });
+    });
+  }
+
+  /**
+   * Subscribe to right-clicks on the chart. Callback receives { index, price }.
+   */
+  onRightClick(callback) {
+    this.container.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      const rect = this.container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const price = this.candleSeries.coordinateToPrice(y);
+      // Find closest candle by x coordinate
+      const logicalRange = this.chart.timeScale().getVisibleLogicalRange();
+      if (!logicalRange || price == null) return;
+      // Use time from coordinate
+      const time = this.chart.timeScale().coordinateToTime(x);
+      if (time == null) return;
+      const index = this.getCandleIndexByTime(time);
+      callback({ index, price });
     });
   }
 }

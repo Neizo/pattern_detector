@@ -30,6 +30,9 @@ class AnnotationManager {
     // Pattern creation state
     this._patternState = null;
 
+    // Pivot batch mode: importance selected in panel before clicking
+    this._pivotImportance = 'medium';
+
     // Dirty flag for save indicator
     this.dirty = false;
 
@@ -43,6 +46,7 @@ class AnnotationManager {
     this._updateInstructions();
     this._cancelPending();
     this._hideForm();
+    this._showPivotPanel(mode === 'pivots');
   }
 
   _updateInstructions() {
@@ -50,10 +54,38 @@ class AnnotationManager {
     const instructions = {
       levels: 'Cliquez-glissez verticalement sur le chart pour tracer une zone S/R.',
       trendlines: 'Cliquez sur un premier point, puis un deuxième pour tracer une trendline.',
-      pivots: 'Cliquez sur une bougie pour marquer un pivot (haut du chart = swing_high, bas = swing_low).',
+      pivots: 'Clic gauche = ajouter pivot · Clic droit = supprimer. Choisissez l\'importance ci-dessous.',
       patterns: 'Sélectionnez un type de pattern puis cliquez les key_points dans l\'ordre.',
     };
     el.textContent = instructions[this.mode] || '';
+  }
+
+  _showPivotPanel(show) {
+    const formEl = document.getElementById('annotation-form');
+    if (!show) return;
+
+    formEl.classList.remove('hidden');
+    formEl.innerHTML = `
+      <div class="form-row">
+        <label>Import.</label>
+        <div class="radio-group">
+          <label><input type="radio" name="pivot-imp-batch" value="minor" ${this._pivotImportance === 'minor' ? 'checked' : ''}> Minor</label>
+          <label><input type="radio" name="pivot-imp-batch" value="medium" ${this._pivotImportance === 'medium' ? 'checked' : ''}> Medium</label>
+          <label><input type="radio" name="pivot-imp-batch" value="major" ${this._pivotImportance === 'major' ? 'checked' : ''}> Major</label>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top: 4px;">
+        <span style="color: var(--text-secondary); font-size: 11px;">
+          Pivots: ${this.annotations.pivots.length}
+        </span>
+      </div>
+    `;
+
+    formEl.querySelectorAll('input[name="pivot-imp-batch"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        this._pivotImportance = formEl.querySelector('input[name="pivot-imp-batch"]:checked').value;
+      });
+    });
   }
 
   // ── Event binding ───────────────────────────────────────────────────
@@ -65,8 +97,11 @@ class AnnotationManager {
     chartEl.addEventListener('mousemove', (e) => this._onMouseMove(e));
     chartEl.addEventListener('mouseup', (e) => this._onMouseUp(e));
 
-    // Chart click for pivots and trendlines
+    // Chart left-click for pivots and trendlines
     this.chart.onClick((info) => this._onChartClick(info));
+
+    // Chart right-click for pivot removal
+    this.chart.onRightClick((info) => this._onChartRightClick(info));
   }
 
   // ── Level creation (click-drag) ─────────────────────────────────────
@@ -219,81 +254,39 @@ class AnnotationManager {
   }
 
   _handlePivotClick(info) {
-    // Auto-detect type: if click is above candle midpoint → swing_high, else swing_low
+    // Batch mode: auto-detect type, add immediately with current importance
     const candle = this.chart.candles[info.index];
     if (!candle) return;
     const mid = (candle.high + candle.low) / 2;
     const type = info.price >= mid ? 'swing_high' : 'swing_low';
 
-    this._showPivotForm(info.index, type, info.price);
+    this._addPivot(info.index, type, this._pivotImportance);
+    // Refresh the pivot panel counter
+    this._showPivotPanel(true);
   }
 
-  _showPivotForm(index, detectedType, clickPrice) {
-    const formEl = document.getElementById('annotation-form');
-    formEl.classList.remove('hidden');
+  _onChartRightClick(info) {
+    if (this.mode !== 'pivots') return;
 
-    const candle = this.chart.candles[index];
-    const prec = this.chart.pricePrecision;
-    const price = detectedType === 'swing_high' ? candle.high : candle.low;
-
-    formEl.innerHTML = `
-      <div class="form-row">
-        <label>Bougie</label>
-        <span style="color: var(--text-primary); font-size: 12px;">#${index} — ${price.toFixed(prec)}</span>
-      </div>
-      <div class="form-row">
-        <label>Type</label>
-        <div class="radio-group">
-          <label><input type="radio" name="pivot-type" value="swing_high" ${detectedType === 'swing_high' ? 'checked' : ''}> Swing High</label>
-          <label><input type="radio" name="pivot-type" value="swing_low" ${detectedType === 'swing_low' ? 'checked' : ''}> Swing Low</label>
-        </div>
-      </div>
-      <div class="form-row">
-        <label>Import.</label>
-        <div class="radio-group">
-          <label><input type="radio" name="pivot-imp" value="minor"> Minor</label>
-          <label><input type="radio" name="pivot-imp" value="medium" checked> Medium</label>
-          <label><input type="radio" name="pivot-imp" value="major"> Major</label>
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="btn-validate" id="btn-pivot-ok">Valider</button>
-        <button class="btn-delete" id="btn-pivot-cancel">Annuler</button>
-      </div>
-    `;
-
-    // Show temporary marker
-    this._showTempPivotMarker(index, detectedType, 'medium');
-
-    // Update preview on type change
-    formEl.querySelectorAll('input[name="pivot-type"], input[name="pivot-imp"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        const t = formEl.querySelector('input[name="pivot-type"]:checked').value;
-        const imp = formEl.querySelector('input[name="pivot-imp"]:checked').value;
-        this._showTempPivotMarker(index, t, imp);
-      });
+    // Find closest pivot within ±2 candles
+    const tolerance = 2;
+    let closest = -1;
+    let closestDist = Infinity;
+    this.annotations.pivots.forEach((p, i) => {
+      const dist = Math.abs(p.index - info.index);
+      if (dist <= tolerance && dist < closestDist) {
+        closestDist = dist;
+        closest = i;
+      }
     });
 
-    document.getElementById('btn-pivot-ok').addEventListener('click', () => {
-      const type = formEl.querySelector('input[name="pivot-type"]:checked').value;
-      const importance = formEl.querySelector('input[name="pivot-imp"]:checked').value;
-      this._addPivot(index, type, importance);
-      this._hideForm();
-    });
-
-    document.getElementById('btn-pivot-cancel').addEventListener('click', () => {
+    if (closest >= 0) {
+      this.annotations.pivots.splice(closest, 1);
+      this.dirty = true;
       this._refreshPivotMarkers();
-      this._hideForm();
-    });
-  }
-
-  _showTempPivotMarker(index, type, importance) {
-    // Show all existing markers plus the temp one
-    const allMarkers = [
-      ...this.annotations.pivots.map(p => ({ index: p.index, type: p.type, importance: p.importance })),
-      { index, type, importance },
-    ];
-    this.chart.setPivotMarkers(allMarkers);
+      this._updateUI();
+      this._showPivotPanel(true);
+    }
   }
 
   _addPivot(index, type, importance) {

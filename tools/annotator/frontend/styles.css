@@ -92,6 +92,18 @@ button {
 button:hover { opacity: 0.85; }
 button:disabled { opacity: 0.4; cursor: default; }
 
+.toggle-btn {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.toggle-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+}
+
 #save-status {
   font-size: 11px;
   color: var(--text-secondary);

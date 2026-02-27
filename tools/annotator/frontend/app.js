@@ -19,6 +19,7 @@
   const inpBefore = document.getElementById('inp-before');
   const btnLoad = document.getElementById('btn-load');
   const btnSave = document.getElementById('btn-save');
+  const btnDisplayToggle = document.getElementById('btn-display-toggle');
   const modeBtns = document.querySelectorAll('.mode-btn');
 
   // ── Init ────────────────────────────────────────────────────────────
@@ -85,6 +86,19 @@
         btn.classList.add('active');
         annotationManager.setMode(btn.dataset.mode);
       });
+    });
+
+    // Display mode toggle: candles ↔ line
+    btnDisplayToggle.addEventListener('click', () => {
+      if (chartManager.displayMode === 'candles') {
+        chartManager.setDisplayMode('line');
+        btnDisplayToggle.textContent = 'Chandeliers';
+        btnDisplayToggle.classList.add('active');
+      } else {
+        chartManager.setDisplayMode('candles');
+        btnDisplayToggle.textContent = 'Courbe';
+        btnDisplayToggle.classList.remove('active');
+      }
     });
   }
 
