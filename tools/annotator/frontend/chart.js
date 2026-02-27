@@ -188,38 +188,49 @@ class ChartManager {
 
   /**
    * Add a horizontal zone (level annotation) between priceHigh and priceLow.
-   * Returns an id for later removal.
+   * startIndex: candle index where the zone starts (extends to the right edge).
    */
-  addLevelZone(id, priceHigh, priceLow, type) {
-    // Remove existing if same id
+  addLevelZone(id, priceHigh, priceLow, type, startIndex) {
     this.removeLevelZone(id);
 
-    const color = type === 'resistance'
-      ? 'rgba(239, 83, 80, 0.15)'
-      : 'rgba(38, 166, 154, 0.15)';
     const lineColor = type === 'resistance'
       ? 'rgba(239, 83, 80, 0.6)'
       : 'rgba(38, 166, 154, 0.6)';
 
-    // Use two horizontal price lines to mark the zone edges
-    // and a baseline series for the fill
-    const topLine = this.candleSeries.createPriceLine({
-      price: priceHigh,
+    const start = (startIndex != null && startIndex >= 0) ? startIndex : 0;
+    const end = this.lwcCandles.length - 1;
+    if (end < 0) return;
+
+    // Build horizontal line data from startIndex to the right edge
+    const topData = [];
+    const bottomData = [];
+    for (let i = start; i <= end; i++) {
+      const t = this.lwcCandles[i].time;
+      topData.push({ time: t, value: priceHigh });
+      bottomData.push({ time: t, value: priceLow });
+    }
+
+    const topSeries = this.chart.addLineSeries({
       color: lineColor,
       lineWidth: 1,
       lineStyle: LightweightCharts.LineStyle.Solid,
-      axisLabelVisible: false,
+      crosshairMarkerVisible: false,
+      priceLineVisible: false,
+      lastValueVisible: false,
     });
+    topSeries.setData(topData);
 
-    const bottomLine = this.candleSeries.createPriceLine({
-      price: priceLow,
+    const bottomSeries = this.chart.addLineSeries({
       color: lineColor,
       lineWidth: 1,
       lineStyle: LightweightCharts.LineStyle.Solid,
-      axisLabelVisible: false,
+      crosshairMarkerVisible: false,
+      priceLineVisible: false,
+      lastValueVisible: false,
     });
+    bottomSeries.setData(bottomData);
 
-    // Label line at midpoint
+    // Label line at midpoint (price line for axis label)
     const midPrice = (priceHigh + priceLow) / 2;
     const labelLine = this.candleSeries.createPriceLine({
       price: midPrice,
@@ -231,15 +242,15 @@ class ChartManager {
       axisLabelColor: lineColor,
     });
 
-    this._levelSeries.push({ id, topLine, bottomLine, labelLine, priceHigh, priceLow });
+    this._levelSeries.push({ id, topSeries, bottomSeries, labelLine, priceHigh, priceLow, startIndex: start });
   }
 
   removeLevelZone(id) {
     const idx = this._levelSeries.findIndex(s => s.id === id);
     if (idx < 0) return;
     const entry = this._levelSeries[idx];
-    this.candleSeries.removePriceLine(entry.topLine);
-    this.candleSeries.removePriceLine(entry.bottomLine);
+    this.chart.removeSeries(entry.topSeries);
+    this.chart.removeSeries(entry.bottomSeries);
     this.candleSeries.removePriceLine(entry.labelLine);
     this._levelSeries.splice(idx, 1);
   }

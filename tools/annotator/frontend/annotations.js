@@ -111,11 +111,16 @@ class AnnotationManager {
     if (e.button !== 0) return;
 
     const rect = this.chart.getChartElement().getBoundingClientRect();
+    const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const price = this.chart.yToPrice(y);
     if (price == null) return;
 
-    this._dragState = { startY: y, startPrice: price };
+    // Capture the candle index where the level starts
+    const time = this.chart.chart.timeScale().coordinateToTime(x);
+    const startIndex = time != null ? this.chart.getCandleIndexByTime(time) : 0;
+
+    this._dragState = { startY: y, startPrice: price, startIndex };
   }
 
   _onMouseMove(e) {
@@ -134,7 +139,7 @@ class AnnotationManager {
     if (this._previewLine) {
       this.chart.removeLevelZone('__preview__');
     }
-    this.chart.addLevelZone('__preview__', priceHigh, priceLow, 'resistance');
+    this.chart.addLevelZone('__preview__', priceHigh, priceLow, 'resistance', this._dragState.startIndex);
     this._previewLine = true;
   }
 
@@ -157,6 +162,7 @@ class AnnotationManager {
 
     const priceHigh = Math.max(this._dragState.startPrice, endPrice);
     const priceLow = Math.min(this._dragState.startPrice, endPrice);
+    const startIndex = this._dragState.startIndex;
 
     // Remove preview
     this.chart.removeLevelZone('__preview__');
@@ -164,10 +170,10 @@ class AnnotationManager {
     this._dragState = null;
 
     // Show form for this level
-    this._showLevelForm(priceHigh, priceLow);
+    this._showLevelForm(priceHigh, priceLow, startIndex);
   }
 
-  _showLevelForm(priceHigh, priceLow) {
+  _showLevelForm(priceHigh, priceLow, startIndex) {
     const formEl = document.getElementById('annotation-form');
     formEl.classList.remove('hidden');
 
@@ -198,14 +204,14 @@ class AnnotationManager {
     `;
 
     // Temporary preview
-    this.chart.addLevelZone('__pending__', priceHigh, priceLow, 'resistance');
+    this.chart.addLevelZone('__pending__', priceHigh, priceLow, 'resistance', startIndex);
 
     // Update preview on type change
     formEl.querySelectorAll('input[name="level-type"]').forEach(radio => {
       radio.addEventListener('change', () => {
         const type = formEl.querySelector('input[name="level-type"]:checked').value;
         this.chart.removeLevelZone('__pending__');
-        this.chart.addLevelZone('__pending__', priceHigh, priceLow, type);
+        this.chart.addLevelZone('__pending__', priceHigh, priceLow, type, startIndex);
       });
     });
 
@@ -214,7 +220,7 @@ class AnnotationManager {
       const note = document.getElementById('level-note').value.trim();
 
       this.chart.removeLevelZone('__pending__');
-      this._addLevel(priceHigh, priceLow, type, note);
+      this._addLevel(priceHigh, priceLow, type, note, startIndex);
       this._hideForm();
     });
 
@@ -224,7 +230,7 @@ class AnnotationManager {
     });
   }
 
-  _addLevel(priceHigh, priceLow, type, note) {
+  _addLevel(priceHigh, priceLow, type, note, startIndex) {
     const prefix = type === 'support' ? 'S' : 'R';
     this._labelCounters[prefix]++;
     const label = `${prefix}${this._labelCounters[prefix]}`;
@@ -235,10 +241,11 @@ class AnnotationManager {
       price_low: priceLow,
       type,
       note,
+      start_index: startIndex != null ? startIndex : 0,
     };
 
     this.annotations.levels.push(level);
-    this.chart.addLevelZone(label, priceHigh, priceLow, type);
+    this.chart.addLevelZone(label, priceHigh, priceLow, type, level.start_index);
     this.dirty = true;
     this._updateUI();
   }
@@ -562,6 +569,7 @@ class AnnotationManager {
           price_low: l.price_low,
           type: l.type,
           note: l.note,
+          start_index: l.start_index,
         })),
         trendlines: this.annotations.trendlines.map(t => ({
           points: t.points,
@@ -609,7 +617,7 @@ class AnnotationManager {
     // Restore levels
     if (ann.levels) {
       for (const l of ann.levels) {
-        this._addLevel(l.price_high, l.price_low, l.type, l.note || '');
+        this._addLevel(l.price_high, l.price_low, l.type, l.note || '', l.start_index || 0);
       }
     }
 
