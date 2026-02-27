@@ -41,7 +41,16 @@ _COLOR_SUPPORT = "#26a69a"     # teal
 _COLOR_RESISTANCE = "#ef5350"  # red
 
 # ── ATR multiples (all price thresholds are ATR-relative) ──────────────────
-_TOUCH_ATR = 0.5          # pivot within ± N×ATR counts as a "touch"
+_TOUCH_ATR_DEFAULT = 0.5  # pivot within ± N×ATR counts as a "touch"
+_TOUCH_ATR_BY_TF: dict[str, float] = {
+    "M15": 0.25,
+    "M30": 0.25,
+    "H1":  0.35,
+    "H4":  0.50,
+    "D1":  0.50,
+    "W1":  0.50,
+}
+_ZONE_MAX_PRICE_RANGE_FRAC = 0.03  # cap: zone half-width ≤ 3% of visible range
 _REACTION_ATR = 0.5       # minimum expected bounce after a touch
 _LOOK_AHEAD_BARS = 5      # bars ahead to measure a bounce (capped at current)
 
@@ -108,6 +117,9 @@ class LevelDetector:
         if atr <= 0:
             return []
 
+        # Resolve timeframe-adaptive touch tolerance
+        touch_atr_mult = _TOUCH_ATR_BY_TF.get(timeframe, _TOUCH_ATR_DEFAULT)
+
         # ── 1. Collect pivots in lookback window ────────────────────────────
         # Clamp lookback to win_start so we never use pivots outside the
         # rendering window — avoids zones anchored on invisible touches.
@@ -124,7 +136,7 @@ class LevelDetector:
         # ATR-scaled bandwidth: resolves individual price clusters better than
         # Silverman which over-smooths when pivot count is low.
         price_std = float(pivot_prices.std()) if len(pivot_prices) > 1 else 1.0
-        bw = (0.5 * atr / price_std) if price_std > 0 else 0.1
+        bw = (touch_atr_mult * atr / price_std) if price_std > 0 else 0.1
         try:
             kde = gaussian_kde(pivot_prices, bw_method=bw)
         except np.linalg.LinAlgError:
@@ -150,7 +162,14 @@ class LevelDetector:
         candidate_prices = grid[candidate_idxs]
 
         # ── 4. Validate each candidate level ────────────────────────────────
-        touch_tol = atr * _TOUCH_ATR
+        touch_tol = atr * touch_atr_mult
+        # Safety cap: zone half-width ≤ 3% of visible price range
+        price_range = float(
+            df["high"].iloc[win_start:win_end + 1].max()
+            - df["low"].iloc[win_start:win_end + 1].min()
+        )
+        if price_range > 0:
+            touch_tol = min(touch_tol, price_range * _ZONE_MAX_PRICE_RANGE_FRAC)
         min_touches: int = self._config.get("level_min_touches", 2)
         current_price = float(df["close"].iloc[current_pivot.index])
 

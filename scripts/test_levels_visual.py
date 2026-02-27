@@ -44,7 +44,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DATA_ROOT = ROOT / "data" / "raw"
-OUTPUT_DIR = ROOT / "output" / "levels_test"
+OUTPUT_BASE = ROOT / "output" / "test" / "levels"
 
 TF_MAP: dict[str, str] = {
     "M15": "M15", "M30": "M30", "M45": "M30", "M90": "H1",
@@ -121,8 +121,6 @@ def run(pairs: list[str], timeframes: list[str] | None, window: int) -> None:
         timeframes: List of CSV filename stems to process, or None for all.
         window: Number of candles to display in each image.
     """
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
     enricher = Enricher()
     pivot_detector = PivotDetector()
     level_detector = LevelDetector({
@@ -140,6 +138,9 @@ def run(pairs: list[str], timeframes: list[str] | None, window: int) -> None:
         if not pair_dir.exists():
             logger.warning("No data directory for %s — skipping", pair)
             continue
+
+        out_dir = OUTPUT_BASE / pair
+        out_dir.mkdir(parents=True, exist_ok=True)
 
         tf_list = timeframes if timeframes else _available_timeframes(pair)
 
@@ -180,7 +181,7 @@ def run(pairs: list[str], timeframes: list[str] | None, window: int) -> None:
             all_level_results = level_detector.detect(
                 df, pivot_store, ref_pivot,
                 win_start=ws, win_end=we,
-                pair=pair, timeframe=tf_stem,
+                pair=pair, timeframe=tf_key,
                 visual_mode=True,
             )
 
@@ -223,23 +224,23 @@ def run(pairs: list[str], timeframes: list[str] | None, window: int) -> None:
                 annotations={"hlines": merged_hlines, "zones": merged_zones},
             )
 
-            # Override OUTPUT_ROOT so images land in levels_test/
+            # Override OUTPUT_ROOT so images land in output/test/levels/{pair}/
             from src.renderer import chart_renderer as _cm
             _orig = _cm.OUTPUT_ROOT
-            _cm.OUTPUT_ROOT = OUTPUT_DIR
+            _cm.OUTPUT_ROOT = out_dir
             try:
                 path = renderer.render(df, result)
             finally:
                 _cm.OUTPUT_ROOT = _orig
 
-            dest = OUTPUT_DIR / f"{pair}_{tf_stem}_levels_last{window}.png"
+            dest = out_dir / f"{tf_stem}_levels_last{window}.png"
             if path.exists() and path != dest:
                 path.replace(dest)
                 path = dest
 
             logger.info("  Saved -> %s", path.name)
 
-    logger.info("Done. Images in: %s", OUTPUT_DIR)
+    logger.info("Done. Images in: %s", OUTPUT_BASE)
 
 
 def _parse_args() -> argparse.Namespace:

@@ -73,8 +73,23 @@ forex-patterns/
 │   │   ├── __init__.py
 │   │   └── chart_renderer.py
 │   └── pipeline.py           # Orchestrateur principal
-├── output/                   # Images générées
-│   ├── double_top/
+├── scripts/                  # Scripts de validation visuelle (1 par pattern)
+│   ├── test_pivots_visual.py
+│   ├── test_levels_visual.py
+│   ├── test_trendlines_visual.py   # (à créer)
+│   ├── test_double_visual.py       # (à créer)
+│   ├── test_head_shoulders_visual.py
+│   ├── test_triangles_visual.py
+│   ├── test_flag_visual.py
+│   └── test_consolidation_visual.py
+├── output/
+│   ├── test/                 # Images de validation visuelle (scripts/)
+│   │   ├── pivots/{PAIR}/    #   ex: pivots/EURUSD/M30_pivots_last500.png
+│   │   ├── levels/{PAIR}/
+│   │   ├── trendlines/{PAIR}/
+│   │   ├── double/{PAIR}/
+│   │   └── ...
+│   ├── double_top/           # Images pipeline production (main.py)
 │   ├── double_bottom/
 │   ├── head_shoulders/
 │   ├── inv_head_shoulders/
@@ -99,6 +114,22 @@ forex-patterns/
 7. LevelDetector (KDE)
 8. TrendlineDetector (RANSAC)
 9. Patterns un par un : double → H&S → triangles → flag → consolidation
+
+## Scripts de validation visuelle
+Chaque détecteur implémenté **doit** avoir un script `scripts/test_{pattern}_visual.py` associé.
+
+### Convention obligatoire
+- **Sortie** : `output/test/{pattern}/{PAIR}/{TF}_{pattern}_last{window}.png`
+- **Arguments CLI** : `--pair` (répétable), `--timeframes`, `--window` (défaut 500)
+- **Timeframe** : passer `tf_key` (clé canonique via `TF_MAP`) au détecteur, pas `tf_stem`
+- **Renderer** : rediriger `OUTPUT_ROOT` vers `out_dir` (= `OUTPUT_BASE / pair`)
+- **Modèle** : suivre la structure de `test_levels_visual.py` ou `test_pivots_visual.py`
+
+### Exemple d'utilisation
+```bash
+py scripts/test_levels_visual.py --pair EURUSD --timeframes M30 H4
+py scripts/test_pivots_visual.py --pair GBPUSD --window 300
+```
 
 ## Références détaillées
 - **Architecture & pipeline** → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)

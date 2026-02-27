@@ -38,7 +38,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 DATA_ROOT = ROOT / "data" / "raw"
-OUTPUT_DIR = ROOT / "output" / "pivots_test"
+OUTPUT_BASE = ROOT / "output" / "test" / "pivots"
 
 # Map filename stem → enricher timeframe key (for Savgol parameters)
 TF_MAP: dict[str, str] = {
@@ -95,8 +95,6 @@ def run(pairs: list[str], timeframes: list[str] | None, window: int) -> None:
         timeframes: List of CSV filename stems to process, or None for all.
         window: Number of candles to show in each rendered image.
     """
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
     enricher = Enricher()
     detector = PivotDetector()
     renderer = ChartRenderer({
@@ -110,6 +108,9 @@ def run(pairs: list[str], timeframes: list[str] | None, window: int) -> None:
         if not pair_dir.exists():
             logger.warning("No data directory for %s — skipping", pair)
             continue
+
+        out_dir = OUTPUT_BASE / pair
+        out_dir.mkdir(parents=True, exist_ok=True)
 
         tf_list = timeframes if timeframes else _available_timeframes(pair)
 
@@ -170,24 +171,24 @@ def run(pairs: list[str], timeframes: list[str] | None, window: int) -> None:
                 annotations={},
             )
 
-            # Redirect output to pivots_test/ by temporarily overriding OUTPUT_ROOT
+            # Redirect output to output/test/pivots/{pair}/
             from src.renderer import chart_renderer as _cm
             _orig = _cm.OUTPUT_ROOT
-            _cm.OUTPUT_ROOT = OUTPUT_DIR
+            _cm.OUTPUT_ROOT = out_dir
             try:
                 path = renderer.render(df, result)
             finally:
                 _cm.OUTPUT_ROOT = _orig
 
             # Rename file to something more descriptive
-            dest = OUTPUT_DIR / f"{pair}_{tf_stem}_pivots_last{window}.png"
+            dest = out_dir / f"{tf_stem}_pivots_last{window}.png"
             if path.exists() and path != dest:
                 path.replace(dest)
                 path = dest
 
             logger.info("  Saved -> %s", path.name)
 
-    logger.info("Done. Images in: %s", OUTPUT_DIR)
+    logger.info("Done. Images in: %s", OUTPUT_BASE)
 
 
 def _parse_args() -> argparse.Namespace:
