@@ -314,5 +314,126 @@ button:disabled { opacity: 0.4; cursor: default; }
 
 .annotation-item .btn-remove:hover { color: var(--accent-red); }
 
+/* ── Comparison Panel ────────────────────────────────────────────────── */
+#comparison-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cmp-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summary-card {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+
+.summary-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.summary-metrics {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+
+.metric {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.metric.matched { color: var(--accent-green); }
+.metric.fp { color: var(--accent-red); }
+.metric.fn { color: var(--accent-orange); }
+
+.summary-scores {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Toggles */
+.cmp-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.toggle-row input[type="checkbox"] {
+  accent-color: var(--accent-blue);
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.matched-dot { background: var(--accent-green); }
+.fp-dot { background: var(--accent-red); }
+.fn-dot { background: var(--accent-orange); }
+
+/* Divergence list */
+.cmp-divergences {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cmp-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+.divergence-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.divergence-item:hover {
+  background: #363a45;
+}
+
+.divergence-item.matched { border-left: 2px solid var(--accent-green); }
+.divergence-item.fp { border-left: 2px solid var(--accent-red); }
+.divergence-item.fn { border-left: 2px solid var(--accent-orange); }
+
 /* ── Utility ─────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }

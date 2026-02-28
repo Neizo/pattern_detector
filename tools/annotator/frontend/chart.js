@@ -25,6 +25,10 @@ class ChartManager {
     this._markers = [];          // pivot markers on candle series
     this._lineSeries = [];       // trendline series
 
+    // Comparison overlays (separate from annotation overlays)
+    this._comparisonSeries = []; // list of { id, topSeries, bottomSeries, labelLine }
+    this._comparisonMarkers = [];
+
     this._init();
   }
 
@@ -341,6 +345,103 @@ class ChartManager {
     for (const entry of [...this._lineSeries]) {
       this.removeTrendline(entry.id);
     }
+  }
+
+  // ── Comparison overlays ────────────────────────────────────────────
+
+  /**
+   * Add a comparison zone with custom color. Separate from annotation zones.
+   */
+  addComparisonZone(id, priceHigh, priceLow, color, startIndex) {
+    this.removeComparisonZone(id);
+
+    const start = (startIndex != null && startIndex >= 0) ? startIndex : 0;
+    const end = this.lwcCandles.length - 1;
+    if (end < 0) return;
+
+    const topData = [];
+    const bottomData = [];
+    for (let i = start; i <= end; i++) {
+      const t = this.lwcCandles[i].time;
+      topData.push({ time: t, value: priceHigh });
+      bottomData.push({ time: t, value: priceLow });
+    }
+
+    const topSeries = this.chart.addLineSeries({
+      color,
+      lineWidth: 1,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      crosshairMarkerVisible: false,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+    topSeries.setData(topData);
+
+    const bottomSeries = this.chart.addLineSeries({
+      color,
+      lineWidth: 1,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      crosshairMarkerVisible: false,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+    bottomSeries.setData(bottomData);
+
+    const midPrice = (priceHigh + priceLow) / 2;
+    const labelLine = this.candleSeries.createPriceLine({
+      price: midPrice,
+      color: 'transparent',
+      lineWidth: 0,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      axisLabelVisible: true,
+      title: id,
+      axisLabelColor: color,
+    });
+
+    this._comparisonSeries.push({ id, topSeries, bottomSeries, labelLine });
+  }
+
+  removeComparisonZone(id) {
+    const idx = this._comparisonSeries.findIndex(s => s.id === id);
+    if (idx < 0) return;
+    const entry = this._comparisonSeries[idx];
+    this.chart.removeSeries(entry.topSeries);
+    this.chart.removeSeries(entry.bottomSeries);
+    this.candleSeries.removePriceLine(entry.labelLine);
+    this._comparisonSeries.splice(idx, 1);
+  }
+
+  /**
+   * Set comparison pivot markers on the lineSeries (doesn't overwrite annotation markers).
+   */
+  setComparisonMarkers(markers) {
+    const lwcMarkers = markers.map(m => {
+      const candle = this.lwcCandles[m.index];
+      if (!candle) return null;
+      const isHigh = m.type === 'swing_high';
+      return {
+        time: candle.time,
+        position: isHigh ? 'aboveBar' : 'belowBar',
+        color: m.color || '#ffffff',
+        shape: isHigh ? 'arrowDown' : 'arrowUp',
+        text: m.label || '',
+      };
+    }).filter(Boolean);
+
+    lwcMarkers.sort((a, b) => a.time - b.time);
+    this.lineSeries.setMarkers(lwcMarkers);
+    this._comparisonMarkers = markers;
+  }
+
+  /**
+   * Clear all comparison overlays (zones + markers).
+   */
+  clearComparison() {
+    for (const entry of [...this._comparisonSeries]) {
+      this.removeComparisonZone(entry.id);
+    }
+    this.lineSeries.setMarkers([]);
+    this._comparisonMarkers = [];
   }
 
   // ── Coordinate helpers ──────────────────────────────────────────────

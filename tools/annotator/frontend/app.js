@@ -8,6 +8,7 @@
   // ── State ───────────────────────────────────────────────────────────
   let chartManager = null;
   let annotationManager = null;
+  let comparisonManager = null;
   let currentPair = null;
   let currentTimeframe = null;
   let autoSaveTimer = null;
@@ -20,6 +21,7 @@
   const btnLoad = document.getElementById('btn-load');
   const btnSave = document.getElementById('btn-save');
   const btnDisplayToggle = document.getElementById('btn-display-toggle');
+  const btnCompare = document.getElementById('btn-compare');
   const modeBtns = document.querySelectorAll('.mode-btn');
 
   // ── Init ────────────────────────────────────────────────────────────
@@ -27,6 +29,7 @@
   async function init() {
     chartManager = new ChartManager('chart-container');
     annotationManager = new AnnotationManager(chartManager);
+    comparisonManager = new ComparisonManager(chartManager);
 
     await loadPairs();
     bindControls();
@@ -100,6 +103,35 @@
         btnDisplayToggle.classList.remove('active');
       }
     });
+
+    // Compare button
+    btnCompare.addEventListener('click', async () => {
+      if (!currentPair || !currentTimeframe) {
+        alert('Chargez un graphique d\'abord.');
+        return;
+      }
+
+      if (comparisonManager.active) {
+        comparisonManager.clear();
+        btnCompare.classList.remove('active');
+        return;
+      }
+
+      btnCompare.disabled = true;
+      btnCompare.textContent = 'Comparaison...';
+      try {
+        const lastN = parseInt(inpLastN.value, 10) || 500;
+        const before = inpBefore.value || null;
+        await comparisonManager.compare(currentPair, currentTimeframe, lastN, before);
+        btnCompare.classList.add('active');
+      } catch (err) {
+        console.error('Comparison failed:', err);
+        alert(`Erreur comparaison: ${err.message}`);
+      } finally {
+        btnCompare.disabled = false;
+        btnCompare.textContent = 'Comparer';
+      }
+    });
   }
 
   // ── Chart loading ───────────────────────────────────────────────────
@@ -116,6 +148,12 @@
     btnLoad.textContent = 'Chargement...';
 
     try {
+      // Clear comparison if active
+      if (comparisonManager.active) {
+        comparisonManager.clear();
+        btnCompare.classList.remove('active');
+      }
+
       await chartManager.loadCandles(pair, tf, lastN, before);
       currentPair = pair;
       currentTimeframe = tf;

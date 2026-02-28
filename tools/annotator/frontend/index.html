@@ -29,6 +29,7 @@
       </label>
       <button id="btn-load">Charger</button>
       <button id="btn-display-toggle" class="toggle-btn" title="Basculer chandeliers / courbe close">Courbe</button>
+      <button id="btn-compare" class="toggle-btn" title="Comparer annotations humaines vs algo">Comparer</button>
     </div>
     <div class="status">
       <span id="save-status"></span>
@@ -41,34 +42,42 @@
     <div id="chart-container"></div>
 
     <aside id="side-panel">
-      <!-- Mode selector -->
-      <div id="mode-bar">
-        <button class="mode-btn active" data-mode="levels">Levels</button>
-        <button class="mode-btn" data-mode="trendlines">Trendlines</button>
-        <button class="mode-btn" data-mode="pivots">Pivots</button>
-        <button class="mode-btn" data-mode="patterns">Patterns</button>
+      <!-- Annotation content (hidden during comparison mode) -->
+      <div id="annotation-content">
+        <!-- Mode selector -->
+        <div id="mode-bar">
+          <button class="mode-btn active" data-mode="levels">Levels</button>
+          <button class="mode-btn" data-mode="trendlines">Trendlines</button>
+          <button class="mode-btn" data-mode="pivots">Pivots</button>
+          <button class="mode-btn" data-mode="patterns">Patterns</button>
+        </div>
+
+        <!-- Mode-specific instructions -->
+        <div id="mode-instructions">
+          <p id="instr-text">Cliquez-glissez verticalement sur le chart pour tracer une zone S/R.</p>
+        </div>
+
+        <!-- Active annotation form (shown when creating/editing) -->
+        <div id="annotation-form" class="hidden">
+          <!-- Dynamically populated by annotations.js -->
+        </div>
+
+        <!-- Annotation counters -->
+        <div id="annotation-counts">
+          <span class="count-badge" data-type="levels">Levels: <b>0</b></span>
+          <span class="count-badge" data-type="trendlines">Trendlines: <b>0</b></span>
+          <span class="count-badge" data-type="pivots">Pivots: <b>0</b></span>
+          <span class="count-badge" data-type="patterns">Patterns: <b>0</b></span>
+        </div>
+
+        <!-- Annotation list -->
+        <div id="annotation-list"></div>
       </div>
 
-      <!-- Mode-specific instructions -->
-      <div id="mode-instructions">
-        <p id="instr-text">Cliquez-glissez verticalement sur le chart pour tracer une zone S/R.</p>
+      <!-- Comparison panel (hidden by default, shown during comparison mode) -->
+      <div id="comparison-panel" class="hidden">
+        <!-- Dynamically populated by comparison.js -->
       </div>
-
-      <!-- Active annotation form (shown when creating/editing) -->
-      <div id="annotation-form" class="hidden">
-        <!-- Dynamically populated by annotations.js -->
-      </div>
-
-      <!-- Annotation counters -->
-      <div id="annotation-counts">
-        <span class="count-badge" data-type="levels">Levels: <b>0</b></span>
-        <span class="count-badge" data-type="trendlines">Trendlines: <b>0</b></span>
-        <span class="count-badge" data-type="pivots">Pivots: <b>0</b></span>
-        <span class="count-badge" data-type="patterns">Patterns: <b>0</b></span>
-      </div>
-
-      <!-- Annotation list -->
-      <div id="annotation-list"></div>
     </aside>
   </main>
 

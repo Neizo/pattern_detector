@@ -15,6 +15,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.data_provider import DataProvider
+from backend.comparator import compare as run_comparison
 
 logging.basicConfig(
     level=logging.INFO,
@@ -89,6 +90,70 @@ def load_annotations(
         data = json.load(f)
 
     return data
+
+
+@app.get("/api/detections")
+def get_detections(
+    pair: str = Query(...),
+    timeframe: str = Query(...),
+    last_n: int = Query(500, ge=10, le=5000),
+    before: Optional[str] = Query(None),
+):
+    """Run algorithmic detection and return results."""
+    try:
+        result = provider.get_detections(pair, timeframe, last_n, before)
+    except FileNotFoundError as e:
+        return JSONResponse(status_code=404, content={"error": str(e)})
+    except Exception as e:
+        logger.exception("Detection failed")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    return result
+
+
+@app.get("/api/compare")
+def compare_annotations(
+    pair: str = Query(...),
+    timeframe: str = Query(...),
+    last_n: int = Query(500, ge=10, le=5000),
+    before: Optional[str] = Query(None),
+):
+    """Compare human annotations against algorithmic detections."""
+    # Load human annotations
+    filename = f"{pair}_{timeframe}_human.json"
+    path = ANNOTATIONS_DIR / filename
+
+    if not path.is_file():
+        return JSONResponse(
+            status_code=404,
+            content={"error": f"No human annotations found for {pair}/{timeframe}"},
+        )
+
+    with open(path, "r", encoding="utf-8") as f:
+        human_data = json.load(f)
+
+    human_annotations = human_data.get("annotations", {})
+
+    # Run algo detections
+    try:
+        algo_detections = provider.get_detections(pair, timeframe, last_n, before)
+    except Exception as e:
+        logger.exception("Detection failed during comparison")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+    atr_median = algo_detections.get("atr_median", 0.001)
+
+    # Run comparison
+    report = run_comparison(human_annotations, algo_detections, atr_median)
+    report["pair"] = pair
+    report["timeframe"] = timeframe
+
+    # Save comparison report
+    report_path = ANNOTATIONS_DIR / f"{pair}_{timeframe}_comparison.json"
+    with open(report_path, "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=2, ensure_ascii=False)
+
+    logger.info("Comparison report saved to %s", report_path)
+    return report
 
 
 # ── Static files (frontend) ───────────────────────────────────────────────
