@@ -36,6 +36,14 @@ class AnnotationManager {
     // Dirty flag for save indicator
     this.dirty = false;
 
+    // Undo/redo stacks
+    this._undoStack = [];
+    this._redoStack = [];
+    this._maxUndoSize = 50;
+
+    // Form keyboard handler ref (for cleanup)
+    this._formKeyHandler = null;
+
     this._bindEvents();
   }
 
@@ -215,19 +223,25 @@ class AnnotationManager {
       });
     });
 
-    document.getElementById('btn-level-ok').addEventListener('click', () => {
+    const validateLevel = () => {
       const type = formEl.querySelector('input[name="level-type"]:checked').value;
       const note = document.getElementById('level-note').value.trim();
-
       this.chart.removeLevelZone('__pending__');
       this._addLevel(priceHigh, priceLow, type, note, startIndex);
       this._hideForm();
-    });
+    };
 
-    document.getElementById('btn-level-cancel').addEventListener('click', () => {
+    const cancelLevel = () => {
       this.chart.removeLevelZone('__pending__');
       this._hideForm();
-    });
+    };
+
+    document.getElementById('btn-level-ok').addEventListener('click', validateLevel);
+    document.getElementById('btn-level-cancel').addEventListener('click', cancelLevel);
+    this._bindFormKeys(validateLevel, cancelLevel);
+
+    // Auto-focus note field
+    setTimeout(() => document.getElementById('level-note')?.focus(), 50);
   }
 
   _addLevel(priceHigh, priceLow, type, note, startIndex) {
@@ -246,6 +260,7 @@ class AnnotationManager {
 
     this.annotations.levels.push(level);
     this.chart.addLevelZone(label, priceHigh, priceLow, type, level.start_index);
+    this._pushUndo({ action: 'add', type: 'levels', data: { ...level }, index: this.annotations.levels.length - 1 });
     this.dirty = true;
     this._updateUI();
   }
@@ -303,7 +318,9 @@ class AnnotationManager {
       this.annotations.pivots.splice(existing, 1);
     }
 
-    this.annotations.pivots.push({ index, type, importance });
+    const pivotData = { index, type, importance };
+    this.annotations.pivots.push(pivotData);
+    this._pushUndo({ action: 'add', type: 'pivots', data: { ...pivotData }, index: this.annotations.pivots.length - 1 });
     this.dirty = true;
     this._refreshPivotMarkers();
     this._updateUI();
@@ -382,19 +399,26 @@ class AnnotationManager {
     const tempId = '__pending_tl__';
     this.chart.addTrendline(tempId, index1, price1, index2, price2, detectedType);
 
-    document.getElementById('btn-tl-ok').addEventListener('click', () => {
+    const validateTl = () => {
       const type = formEl.querySelector('input[name="tl-type"]:checked').value;
       const note = document.getElementById('tl-note').value.trim();
       this.chart.removeTrendline(tempId);
       this._addTrendline(index1, price1, index2, price2, type, note);
       this._hideForm();
-    });
+    };
 
-    document.getElementById('btn-tl-cancel').addEventListener('click', () => {
+    const cancelTl = () => {
       this.chart.removeTrendline(tempId);
       this._hideForm();
       this._updateInstructions();
-    });
+    };
+
+    document.getElementById('btn-tl-ok').addEventListener('click', validateTl);
+    document.getElementById('btn-tl-cancel').addEventListener('click', cancelTl);
+    this._bindFormKeys(validateTl, cancelTl);
+
+    // Auto-focus note field
+    setTimeout(() => document.getElementById('tl-note')?.focus(), 50);
   }
 
   _addTrendline(index1, price1, index2, price2, type, note) {
@@ -410,6 +434,7 @@ class AnnotationManager {
     };
     this.annotations.trendlines.push(trendline);
     this.chart.addTrendline(id, index1, price1, index2, price2, type);
+    this._pushUndo({ action: 'add', type: 'trendlines', data: { ...trendline, points: [...trendline.points] }, index: this.annotations.trendlines.length - 1 });
     this.dirty = true;
     this._updateUI();
     this._updateInstructions();
@@ -422,6 +447,7 @@ class AnnotationManager {
     if (!list || index < 0 || index >= list.length) return;
 
     const item = list[index];
+    this._pushUndo({ action: 'remove', type, data: { ...item }, index });
 
     if (type === 'levels') {
       this.chart.removeLevelZone(item.id);
@@ -469,6 +495,7 @@ class AnnotationManager {
         lvl.type === 'support' ? 'support' : 'resistance',
         `${lvl.price_low.toFixed(prec)} — ${lvl.price_high.toFixed(prec)}${lvl.note ? ' · ' + lvl.note : ''}`,
         () => this.removeAnnotation('levels', i),
+        () => this.chart.scrollToIndex(lvl.start_index || 0, 30),
       );
       listEl.appendChild(item);
     });
@@ -480,6 +507,7 @@ class AnnotationManager {
         'trendline',
         `${tl.type} #${tl.points[0].index}→#${tl.points[1].index}${tl.note ? ' · ' + tl.note : ''}`,
         () => this.removeAnnotation('trendlines', i),
+        () => this.chart.scrollToIndex(tl.points[0].index, 30),
       );
       listEl.appendChild(item);
     });
@@ -492,6 +520,7 @@ class AnnotationManager {
         cls,
         `${p.type} [${p.importance}]`,
         () => this.removeAnnotation('pivots', i),
+        () => this.chart.scrollToIndex(p.index, 30),
       );
       listEl.appendChild(item);
     });
@@ -508,13 +537,21 @@ class AnnotationManager {
     });
   }
 
-  _createListItem(label, labelClass, info, onRemove) {
+  _createListItem(label, labelClass, info, onRemove, onNavigate) {
     const div = document.createElement('div');
     div.className = 'annotation-item';
     div.innerHTML = `
       <span class="label ${labelClass}">${label}</span>
       <span class="info">${info}</span>
     `;
+
+    if (onNavigate) {
+      div.addEventListener('click', () => {
+        onNavigate();
+        div.classList.add('highlighted');
+        setTimeout(() => div.classList.remove('highlighted'), 600);
+      });
+    }
 
     const btn = document.createElement('button');
     btn.className = 'btn-remove';
@@ -544,6 +581,28 @@ class AnnotationManager {
 
   _hideForm() {
     document.getElementById('annotation-form').classList.add('hidden');
+    this._removeFormKeyHandler();
+  }
+
+  _bindFormKeys(onValidate, onCancel) {
+    this._removeFormKeyHandler();
+    this._formKeyHandler = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        onValidate();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        onCancel();
+      }
+    };
+    document.addEventListener('keydown', this._formKeyHandler);
+  }
+
+  _removeFormKeyHandler() {
+    if (this._formKeyHandler) {
+      document.removeEventListener('keydown', this._formKeyHandler);
+      this._formKeyHandler = null;
+    }
   }
 
   _cancelPending() {
@@ -554,6 +613,71 @@ class AnnotationManager {
       this.chart.removeLevelZone('__preview__');
       this._previewLine = null;
     }
+  }
+
+  // ── Undo / Redo ────────────────────────────────────────────────────
+
+  _pushUndo(entry) {
+    this._undoStack.push(entry);
+    if (this._undoStack.length > this._maxUndoSize) {
+      this._undoStack.shift();
+    }
+    this._redoStack = [];
+  }
+
+  undo() {
+    if (this._undoStack.length === 0) return;
+    const entry = this._undoStack.pop();
+    this._redoStack.push(entry);
+    this._applyUndoEntry(entry, true);
+  }
+
+  redo() {
+    if (this._redoStack.length === 0) return;
+    const entry = this._redoStack.pop();
+    this._undoStack.push(entry);
+    this._applyUndoEntry(entry, false);
+  }
+
+  _applyUndoEntry(entry, isUndo) {
+    // isUndo: true → reverse the action, false → replay it
+    const shouldAdd = isUndo ? entry.action === 'remove' : entry.action === 'add';
+
+    if (shouldAdd) {
+      // Re-add the annotation without pushing to undo stack
+      if (entry.type === 'levels') {
+        const l = entry.data;
+        this.annotations.levels.splice(entry.index, 0, l);
+        this.chart.addLevelZone(l.id, l.price_high, l.price_low, l.type, l.start_index);
+      } else if (entry.type === 'trendlines') {
+        const t = entry.data;
+        this.annotations.trendlines.splice(entry.index, 0, t);
+        this.chart.addTrendline(t.id, t.points[0].index, t.points[0].price, t.points[1].index, t.points[1].price, t.type);
+      } else if (entry.type === 'pivots') {
+        this.annotations.pivots.splice(entry.index, 0, entry.data);
+        this._refreshPivotMarkers();
+      }
+    } else {
+      // Remove the annotation without pushing to undo stack
+      const list = this.annotations[entry.type];
+      const idx = entry.type === 'pivots'
+        ? list.findIndex(p => p.index === entry.data.index)
+        : list.findIndex(a => a.id === entry.data.id);
+      if (idx >= 0) {
+        if (entry.type === 'levels') {
+          this.chart.removeLevelZone(list[idx].id);
+        } else if (entry.type === 'trendlines') {
+          this.chart.removeTrendline(list[idx].id);
+        }
+        list.splice(idx, 1);
+        if (entry.type === 'pivots') {
+          this._refreshPivotMarkers();
+        }
+      }
+    }
+
+    this.dirty = true;
+    this._updateUI();
   }
 
   // ── Serialization ───────────────────────────────────────────────────

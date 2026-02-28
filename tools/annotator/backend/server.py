@@ -31,6 +31,33 @@ ANNOTATIONS_DIR = PROJECT_ROOT / "annotations"
 ANNOTATIONS_DIR.mkdir(exist_ok=True)
 
 
+def _annotation_path(pair: str, timeframe: str, suffix: str = "human") -> Path:
+    """Return path: annotations/{pair}/{timeframe}_{suffix}.json"""
+    pair_dir = ANNOTATIONS_DIR / pair
+    pair_dir.mkdir(exist_ok=True)
+    return pair_dir / f"{timeframe}_{suffix}.json"
+
+
+def _migrate_flat_annotations():
+    """Move legacy flat files (PAIR_TF_*.json) into per-pair subdirectories."""
+    for f in ANNOTATIONS_DIR.glob("*_*_*.json"):
+        if f.parent != ANNOTATIONS_DIR:
+            continue
+        parts = f.stem.split("_", 2)  # e.g. EURUSD_H4_human
+        if len(parts) == 3:
+            pair, tf, suffix = parts
+            dest = _annotation_path(pair, tf, suffix)
+            if not dest.exists():
+                f.rename(dest)
+                logger.info("Migrated %s → %s", f.name, dest)
+            else:
+                f.unlink()
+                logger.info("Removed duplicate %s (already exists at %s)", f.name, dest)
+
+
+_migrate_flat_annotations()
+
+
 # ── API Endpoints ──────────────────────────────────────────────────────────
 
 
@@ -64,8 +91,7 @@ async def save_annotations(payload: dict):
     """Save human annotations to JSON file."""
     pair = payload.get("pair", "UNKNOWN")
     tf = payload.get("timeframe", "UNKNOWN")
-    filename = f"{pair}_{tf}_human.json"
-    path = ANNOTATIONS_DIR / filename
+    path = _annotation_path(pair, tf, "human")
 
     with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
@@ -80,8 +106,7 @@ def load_annotations(
     timeframe: str = Query(...),
 ):
     """Load previously saved annotations."""
-    filename = f"{pair}_{timeframe}_human.json"
-    path = ANNOTATIONS_DIR / filename
+    path = _annotation_path(pair, timeframe, "human")
 
     if not path.is_file():
         return {"annotations": None}
@@ -119,8 +144,7 @@ def compare_annotations(
 ):
     """Compare human annotations against algorithmic detections."""
     # Load human annotations
-    filename = f"{pair}_{timeframe}_human.json"
-    path = ANNOTATIONS_DIR / filename
+    path = _annotation_path(pair, timeframe, "human")
 
     if not path.is_file():
         return JSONResponse(
@@ -148,7 +172,7 @@ def compare_annotations(
     report["timeframe"] = timeframe
 
     # Save comparison report
-    report_path = ANNOTATIONS_DIR / f"{pair}_{timeframe}_comparison.json"
+    report_path = _annotation_path(pair, timeframe, "comparison")
     with open(report_path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
 

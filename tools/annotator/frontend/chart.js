@@ -444,6 +444,77 @@ class ChartManager {
     this._comparisonMarkers = [];
   }
 
+  // ── Navigation ─────────────────────────────────────────────────────
+
+  /**
+   * Scroll the chart to center on a specific candle index.
+   */
+  scrollToIndex(index, padding = 20) {
+    const from = Math.max(0, index - padding);
+    const to = Math.min(this.lwcCandles.length - 1, index + padding);
+    this.chart.timeScale().setVisibleLogicalRange({ from, to });
+  }
+
+  /**
+   * Scroll to an index and flash a temporary price line to draw attention.
+   */
+  scrollToPrice(price, index) {
+    this.scrollToIndex(index, 30);
+
+    // Flash a bright price line for 2 seconds
+    const flashLine = this.candleSeries.createPriceLine({
+      price,
+      color: '#ffeb3b',
+      lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      axisLabelVisible: true,
+      title: '',
+      axisLabelColor: '#ffeb3b',
+    });
+
+    setTimeout(() => {
+      try { this.candleSeries.removePriceLine(flashLine); } catch (_) {}
+    }, 2000);
+  }
+
+  /**
+   * Zoom in by reducing the visible range by 20%.
+   */
+  zoomIn() {
+    const range = this.chart.timeScale().getVisibleLogicalRange();
+    if (!range) return;
+    const delta = (range.to - range.from) * 0.1;
+    this.chart.timeScale().setVisibleLogicalRange({
+      from: range.from + delta,
+      to: range.to - delta,
+    });
+  }
+
+  /**
+   * Zoom out by expanding the visible range by 20%.
+   */
+  zoomOut() {
+    const range = this.chart.timeScale().getVisibleLogicalRange();
+    if (!range) return;
+    const delta = (range.to - range.from) * 0.1;
+    this.chart.timeScale().setVisibleLogicalRange({
+      from: Math.max(0, range.from - delta),
+      to: Math.min(this.lwcCandles.length - 1, range.to + delta),
+    });
+  }
+
+  /**
+   * Scroll the chart left or right by a number of candles.
+   */
+  scrollBy(candles) {
+    const range = this.chart.timeScale().getVisibleLogicalRange();
+    if (!range) return;
+    this.chart.timeScale().setVisibleLogicalRange({
+      from: range.from + candles,
+      to: range.to + candles,
+    });
+  }
+
   // ── Coordinate helpers ──────────────────────────────────────────────
 
   /**

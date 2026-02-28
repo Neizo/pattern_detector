@@ -33,6 +33,7 @@
 
     await loadPairs();
     bindControls();
+    bindKeyboardShortcuts();
     startAutoSave();
   }
 
@@ -209,6 +210,82 @@
     } catch (err) {
       console.error('Save failed:', err);
     }
+  }
+
+  // ── Keyboard shortcuts ──────────────────────────────────────────────
+
+  function bindKeyboardShortcuts() {
+    const modeKeys = { '1': 'levels', '2': 'trendlines', '3': 'pivots', '4': 'patterns' };
+
+    document.addEventListener('keydown', (e) => {
+      const tag = (e.target.tagName || '').toLowerCase();
+      const inInput = tag === 'input' || tag === 'select' || tag === 'textarea';
+
+      // Ctrl+S — save (always active)
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveAnnotations();
+        return;
+      }
+
+      // Ctrl+Z — undo
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        annotationManager.undo();
+        return;
+      }
+
+      // Ctrl+Y or Ctrl+Shift+Z — redo
+      if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'Z')) {
+        e.preventDefault();
+        annotationManager.redo();
+        return;
+      }
+
+      // Escape — cancel pending operation
+      if (e.key === 'Escape' && !inInput) {
+        annotationManager._cancelPending();
+        annotationManager._hideForm();
+        return;
+      }
+
+      // Skip remaining shortcuts if focused on an input
+      if (inInput) return;
+
+      // Mode switching: 1-4
+      if (modeKeys[e.key]) {
+        const mode = modeKeys[e.key];
+        modeBtns.forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === mode);
+        });
+        annotationManager.setMode(mode);
+        return;
+      }
+
+      // Arrow keys — scroll chart
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        chartManager.scrollBy(-10);
+        return;
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        chartManager.scrollBy(10);
+        return;
+      }
+
+      // +/- — zoom
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        chartManager.zoomIn();
+        return;
+      }
+      if (e.key === '-') {
+        e.preventDefault();
+        chartManager.zoomOut();
+        return;
+      }
+    });
   }
 
   function startAutoSave() {

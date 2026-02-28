@@ -252,6 +252,17 @@ class ComparisonManager {
       });
     });
 
+    // Bind divergence item clicks → scroll chart
+    panel.querySelectorAll('.divergence-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const price = parseFloat(item.dataset.price);
+        const index = parseInt(item.dataset.index || '0', 10);
+        if (!isNaN(price)) {
+          this.chart.scrollToPrice(price, index);
+        }
+      });
+    });
+
     // Bind back button
     document.getElementById('btn-cmp-back').addEventListener('click', () => {
       this.clear();
@@ -270,8 +281,9 @@ class ComparisonManager {
     // Matched
     for (const m of (matched || [])) {
       const price = m.algo?.price ?? m.algo?.index ?? '?';
+      const idx = m.algo?.start_index ?? m.algo?.index ?? 0;
       const detail = typeof price === 'number' ? price.toFixed(prec) : price;
-      html += `<div class="divergence-item matched" data-price="${price}">
+      html += `<div class="divergence-item matched" data-price="${price}" data-index="${idx}">
         <span class="dot matched-dot"></span>
         <span>Match · ${detail}</span>
       </div>`;
@@ -280,8 +292,9 @@ class ComparisonManager {
     // False positives
     for (const fp of (false_positives || [])) {
       const price = fp.algo?.price ?? fp.algo?.index ?? '?';
+      const idx = fp.algo?.start_index ?? fp.algo?.index ?? 0;
       const detail = typeof price === 'number' ? price.toFixed(prec) : price;
-      html += `<div class="divergence-item fp" data-price="${price}">
+      html += `<div class="divergence-item fp" data-price="${price}" data-index="${idx}">
         <span class="dot fp-dot"></span>
         <span>FP · ${detail}</span>
       </div>`;
@@ -290,8 +303,9 @@ class ComparisonManager {
     // False negatives
     for (const fn of (false_negatives || [])) {
       const price = fn.human?.price_high ?? fn.human?.index ?? '?';
+      const idx = fn.human?.start_index ?? fn.human?.index ?? 0;
       const detail = typeof price === 'number' ? price.toFixed(prec) : price;
-      html += `<div class="divergence-item fn" data-price="${price}">
+      html += `<div class="divergence-item fn" data-price="${price}" data-index="${idx}">
         <span class="dot fn-dot"></span>
         <span>FN · ${detail}</span>
       </div>`;

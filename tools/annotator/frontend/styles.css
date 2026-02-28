@@ -314,6 +314,11 @@ button:disabled { opacity: 0.4; cursor: default; }
 
 .annotation-item .btn-remove:hover { color: var(--accent-red); }
 
+.annotation-item.highlighted {
+  background: rgba(41, 98, 255, 0.3);
+  transition: background 0.3s;
+}
+
 /* ── Comparison Panel ────────────────────────────────────────────────── */
 #comparison-panel {
   flex: 1;
