@@ -22,6 +22,7 @@
   const btnSave = document.getElementById('btn-save');
   const btnDisplayToggle = document.getElementById('btn-display-toggle');
   const btnCompare = document.getElementById('btn-compare');
+  const btnHideHuman = document.getElementById('btn-hide-human');
   const modeBtns = document.querySelectorAll('.mode-btn');
 
   // ── Init ────────────────────────────────────────────────────────────
@@ -102,6 +103,19 @@
         chartManager.setDisplayMode('candles');
         btnDisplayToggle.textContent = 'Courbe';
         btnDisplayToggle.classList.remove('active');
+      }
+    });
+
+    // Hide/show human annotations
+    btnHideHuman.addEventListener('click', () => {
+      const visible = !chartManager._annotationsVisible;
+      // Update button state first (even if chart method throws)
+      btnHideHuman.textContent = visible ? 'Masquer humain' : 'Afficher humain';
+      btnHideHuman.classList.toggle('active', !visible);
+      try {
+        chartManager.setAnnotationsVisible(visible);
+      } catch (err) {
+        console.error('setAnnotationsVisible failed:', err);
       }
     });
 

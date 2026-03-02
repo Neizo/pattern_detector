@@ -29,6 +29,9 @@ class ChartManager {
     this._comparisonSeries = []; // list of { id, topSeries, bottomSeries, labelLine }
     this._comparisonMarkers = [];
 
+    // Annotation visibility toggle
+    this._annotationsVisible = true;
+
     this._init();
   }
 
@@ -344,6 +347,50 @@ class ChartManager {
   clearAllTrendlines() {
     for (const entry of [...this._lineSeries]) {
       this.removeTrendline(entry.id);
+    }
+  }
+
+  // ── Annotation visibility toggle ───────────────────────────────────
+
+  setAnnotationsVisible(visible) {
+    this._annotationsVisible = visible;
+
+    // Toggle level zone series
+    for (const entry of this._levelSeries) {
+      entry.topSeries.applyOptions({ visible });
+      entry.bottomSeries.applyOptions({ visible });
+      // PriceLine has no applyOptions — remove/recreate to toggle
+      if (!visible && entry.labelLine) {
+        try { this.candleSeries.removePriceLine(entry.labelLine); } catch (_) {}
+        entry._labelHidden = true;
+      } else if (visible && entry._labelHidden) {
+        const midPrice = (entry.priceHigh + entry.priceLow) / 2;
+        const lineColor = entry.id.startsWith('S')
+          ? 'rgba(38, 166, 154, 0.6)'
+          : 'rgba(239, 83, 80, 0.6)';
+        entry.labelLine = this.candleSeries.createPriceLine({
+          price: midPrice,
+          color: 'transparent',
+          lineWidth: 0,
+          lineStyle: LightweightCharts.LineStyle.Solid,
+          axisLabelVisible: true,
+          title: entry.id,
+          axisLabelColor: lineColor,
+        });
+        entry._labelHidden = false;
+      }
+    }
+
+    // Toggle trendline series
+    for (const entry of this._lineSeries) {
+      entry.series.applyOptions({ visible });
+    }
+
+    // Toggle pivot markers
+    if (visible) {
+      this.setPivotMarkers(this._markers);
+    } else {
+      this.candleSeries.setMarkers([]);
     }
   }
 
