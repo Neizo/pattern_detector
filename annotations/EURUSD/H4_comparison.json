@@ -1,0 +1,497 @@
+{
+  "atr_median": 0.002239,
+  "summary": {
+    "levels": {
+      "matched": 0,
+      "false_positives": 0,
+      "false_negatives": 2,
+      "precision": 0.0,
+      "recall": 0.0
+    },
+    "pivots": {
+      "matched": 18,
+      "false_positives": 17,
+      "false_negatives": 1,
+      "precision": 0.5143,
+      "recall": 0.9474
+    },
+    "trendlines": {
+      "matched": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 0.0,
+      "recall": 0.0
+    }
+  },
+  "levels": {
+    "matched": [],
+    "false_positives": [],
+    "false_negatives": [
+      {
+        "human": {
+          "price_high": 1.171247875751503,
+          "price_low": 1.1703132064128257,
+          "type": "support",
+          "note": "",
+          "start_index": 162
+        },
+        "nearest_algo": null
+      },
+      {
+        "human": {
+          "price_high": 1.1562401720351392,
+          "price_low": 1.1546757320644216,
+          "type": "resistance",
+          "note": "",
+          "start_index": 119
+        },
+        "nearest_algo": null
+      }
+    ]
+  },
+  "pivots": {
+    "matched": [
+      {
+        "human": {
+          "index": 36,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 36,
+          "price": 1.18727,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.03869
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 56,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 56,
+          "price": 1.17262,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.007266
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 156,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 156,
+          "price": 1.15423,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.014953
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 174,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 174,
+          "price": 1.17283,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.015335
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 436,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 436,
+          "price": 1.1804,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.006781
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 15,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 14,
+          "price": 1.16772,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.008209
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 66,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 67,
+          "price": 1.1819,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.007533
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 78,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 79,
+          "price": 1.16568,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.008402
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 100,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 101,
+          "price": 1.17659,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.009765
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 140,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 141,
+          "price": 1.15551,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.005714
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 220,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 219,
+          "price": 1.16648,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.006244
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 252,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 251,
+          "price": 1.1475,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.031267
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 299,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 298,
+          "price": 1.16526,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.013487
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 330,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 331,
+          "price": 1.15005,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.013189
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 384,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 385,
+          "price": 1.16808,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.004527
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 406,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 407,
+          "price": 1.16234,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.003875
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 453,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 454,
+          "price": 1.17021,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.00465
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 149,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 147,
+          "price": 1.16285,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.005249
+        },
+        "index_distance": 2
+      }
+    ],
+    "false_positives": [
+      {
+        "algo": {
+          "index": 1,
+          "price": 1.17799,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.008292
+        }
+      },
+      {
+        "algo": {
+          "index": 21,
+          "price": 1.17013,
+          "type": "swing_low",
+          "strength": 1,
+          "prominence": 0.00224
+        }
+      },
+      {
+        "algo": {
+          "index": 110,
+          "price": 1.1713,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.003088
+        }
+      },
+      {
+        "algo": {
+          "index": 114,
+          "price": 1.17591,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 0.00262
+        }
+      },
+      {
+        "algo": {
+          "index": 120,
+          "price": 1.16516,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.003666
+        }
+      },
+      {
+        "algo": {
+          "index": 132,
+          "price": 1.16059,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.00226
+        }
+      },
+      {
+        "algo": {
+          "index": 200,
+          "price": 1.15853,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.006261
+        }
+      },
+      {
+        "algo": {
+          "index": 269,
+          "price": 1.15834,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.00206
+        }
+      },
+      {
+        "algo": {
+          "index": 323,
+          "price": 1.1507,
+          "type": "swing_low",
+          "strength": 1,
+          "prominence": 0.002434
+        }
+      },
+      {
+        "algo": {
+          "index": 328,
+          "price": 1.15524,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.001783
+        }
+      },
+      {
+        "algo": {
+          "index": 336,
+          "price": 1.15503,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 0.001771
+        }
+      },
+      {
+        "algo": {
+          "index": 360,
+          "price": 1.1555,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.003175
+        }
+      },
+      {
+        "algo": {
+          "index": 367,
+          "price": 1.16488,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 0.002992
+        }
+      },
+      {
+        "algo": {
+          "index": 374,
+          "price": 1.1591,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.001758
+        }
+      },
+      {
+        "algo": {
+          "index": 441,
+          "price": 1.17077,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.002813
+        }
+      },
+      {
+        "algo": {
+          "index": 444,
+          "price": 1.17456,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 0.001773
+        }
+      },
+      {
+        "algo": {
+          "index": 471,
+          "price": 1.18038,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 0.005706
+        }
+      }
+    ],
+    "false_negatives": [
+      {
+        "human": {
+          "index": 194,
+          "type": "swing_low",
+          "importance": "medium"
+        }
+      }
+    ]
+  },
+  "trendlines": {
+    "matched": [],
+    "false_positives": [],
+    "false_negatives": []
+  },
+  "pair": "EURUSD",
+  "timeframe": "H4"
+}

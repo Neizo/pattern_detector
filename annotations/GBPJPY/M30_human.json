@@ -1,0 +1,127 @@
+{
+  "pair": "GBPJPY",
+  "timeframe": "M30",
+  "window": {
+    "last_n": 500,
+    "before": "2025-12-31"
+  },
+  "annotations": {
+    "levels": [
+      {
+        "price_high": 210.64280961923848,
+        "price_low": 210.48571543086172,
+        "type": "support",
+        "note": "",
+        "start_index": 355
+      },
+      {
+        "price_high": 207.99033466933867,
+        "price_low": 207.8453246492986,
+        "type": "support",
+        "note": "",
+        "start_index": 11
+      },
+      {
+        "price_high": 211.5370380761523,
+        "price_low": 211.4041122244489,
+        "type": "resistance",
+        "note": "",
+        "start_index": 140
+      }
+    ],
+    "trendlines": [],
+    "pivots": [
+      {
+        "index": 18,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 54,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 113,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 130,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 206,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 240,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 273,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 322,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 346,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 359,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 375,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 409,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 416,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 425,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 447,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 258,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 265,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 162,
+        "type": "swing_high",
+        "importance": "medium"
+      }
+    ],
+    "patterns": []
+  }
+}

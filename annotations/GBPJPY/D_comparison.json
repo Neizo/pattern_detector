@@ -1,0 +1,1028 @@
+{
+  "atr_median": 1.493469,
+  "summary": {
+    "levels": {
+      "matched": 2,
+      "false_positives": 3,
+      "false_negatives": 0,
+      "precision": 0.4,
+      "recall": 1.0
+    },
+    "pivots": {
+      "matched": 19,
+      "false_positives": 50,
+      "false_negatives": 0,
+      "precision": 0.2754,
+      "recall": 1.0
+    },
+    "trendlines": {
+      "matched": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 0.0,
+      "recall": 0.0
+    }
+  },
+  "levels": {
+    "matched": [
+      {
+        "human": {
+          "price_high": 200.3552124248497,
+          "price_low": 199.34294789579158,
+          "type": "resistance",
+          "note": "",
+          "start_index": 102
+        },
+        "algo": {
+          "price": 199.694133,
+          "type": "support",
+          "confidence": 0.8967,
+          "touches": 9,
+          "zone_top": 200.298115,
+          "zone_bottom": 199.090151,
+          "start_index": 16,
+          "key_points": [
+            {
+              "index": 16,
+              "price": 199.4
+            },
+            {
+              "index": 132,
+              "price": 199.705
+            },
+            {
+              "index": 139,
+              "price": 199.551
+            },
+            {
+              "index": 348,
+              "price": 199.661
+            },
+            {
+              "index": 356,
+              "price": 199.698
+            },
+            {
+              "index": 368,
+              "price": 199.514
+            },
+            {
+              "index": 379,
+              "price": 200.276
+            },
+            {
+              "index": 411,
+              "price": 200.047
+            },
+            {
+              "index": 451,
+              "price": 199.821
+            }
+          ]
+        },
+        "algo_inside_zone": true,
+        "distance_to_zone_center_atr": 0.1037
+      },
+      {
+        "human": {
+          "price_high": 189.92782965931863,
+          "price_low": 188.93108416833667,
+          "type": "resistance",
+          "note": "",
+          "start_index": 67
+        },
+        "algo": {
+          "price": 189.801038,
+          "type": "support",
+          "confidence": 0.7449,
+          "touches": 4,
+          "zone_top": 190.273027,
+          "zone_bottom": 189.329049,
+          "start_index": 106,
+          "key_points": [
+            {
+              "index": 106,
+              "price": 189.951
+            },
+            {
+              "index": 200,
+              "price": 189.607
+            },
+            {
+              "index": 277,
+              "price": 189.637
+            },
+            {
+              "index": 294,
+              "price": 190.23
+            }
+          ]
+        },
+        "algo_inside_zone": true,
+        "distance_to_zone_center_atr": 0.2488
+      }
+    ],
+    "false_positives": [
+      {
+        "algo": {
+          "price": 195.886878,
+          "type": "support",
+          "confidence": 0.8797,
+          "touches": 8,
+          "zone_top": 196.526508,
+          "zone_bottom": 195.247248,
+          "start_index": 50,
+          "key_points": [
+            {
+              "index": 50,
+              "price": 195.854
+            },
+            {
+              "index": 112,
+              "price": 195.611
+            },
+            {
+              "index": 135,
+              "price": 196.301
+            },
+            {
+              "index": 260,
+              "price": 195.969
+            },
+            {
+              "index": 300,
+              "price": 196.402
+            },
+            {
+              "index": 313,
+              "price": 196.311
+            },
+            {
+              "index": 343,
+              "price": 195.357
+            },
+            {
+              "index": 370,
+              "price": 195.284
+            }
+          ]
+        },
+        "nearest_human_zone": {
+          "price_high": 200.3552124248497,
+          "price_low": 199.34294789579158,
+          "distance_to_nearest_edge_atr": 2.3141
+        }
+      },
+      {
+        "algo": {
+          "price": 195.425392,
+          "type": "resistance",
+          "confidence": 0.8566,
+          "touches": 10,
+          "zone_top": 196.370632,
+          "zone_bottom": 194.480152,
+          "start_index": 50,
+          "key_points": [
+            {
+              "index": 50,
+              "price": 195.854
+            },
+            {
+              "index": 104,
+              "price": 194.968
+            },
+            {
+              "index": 112,
+              "price": 195.611
+            },
+            {
+              "index": 135,
+              "price": 196.301
+            },
+            {
+              "index": 189,
+              "price": 194.637
+            },
+            {
+              "index": 252,
+              "price": 194.898
+            },
+            {
+              "index": 260,
+              "price": 195.969
+            },
+            {
+              "index": 313,
+              "price": 196.311
+            },
+            {
+              "index": 343,
+              "price": 195.357
+            },
+            {
+              "index": 370,
+              "price": 195.284
+            }
+          ]
+        },
+        "nearest_human_zone": {
+          "price_high": 200.3552124248497,
+          "price_low": 199.34294789579158,
+          "distance_to_nearest_edge_atr": 2.6231
+        }
+      },
+      {
+        "algo": {
+          "price": 188.128153,
+          "type": "support",
+          "confidence": 0.8459,
+          "touches": 6,
+          "zone_top": 188.957622,
+          "zone_bottom": 187.298684,
+          "start_index": 71,
+          "key_points": [
+            {
+              "index": 71,
+              "price": 188.227
+            },
+            {
+              "index": 162,
+              "price": 188.077
+            },
+            {
+              "index": 221,
+              "price": 187.408
+            },
+            {
+              "index": 236,
+              "price": 187.673
+            },
+            {
+              "index": 245,
+              "price": 188.786
+            },
+            {
+              "index": 282,
+              "price": 187.459
+            }
+          ]
+        },
+        "nearest_human_zone": {
+          "price_high": 189.92782965931863,
+          "price_low": 188.93108416833667,
+          "distance_to_nearest_edge_atr": 0.5376
+        }
+      }
+    ],
+    "false_negatives": []
+  },
+  "pivots": {
+    "matched": [
+      {
+        "human": {
+          "index": 6,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 6,
+          "price": 197.196,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 2.001314
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 83,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 83,
+          "price": 193.471,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 6.150657
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 94,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 94,
+          "price": 184.261,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 7.358629
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 132,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 132,
+          "price": 199.705,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 11.194829
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 184,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 184,
+          "price": 198.713,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 8.134086
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 200,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 200,
+          "price": 189.607,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 3.4214
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 236,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 236,
+          "price": 187.673,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 3.507971
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 260,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 260,
+          "price": 195.969,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 6.996429
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 348,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 348,
+          "price": 199.661,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 3.686029
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 427,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 427,
+          "price": 205.32,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 3.811771
+        },
+        "index_distance": 0
+      },
+      {
+        "human": {
+          "index": 37,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 38,
+          "price": 208.106,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 22.411143
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 58,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 59,
+          "price": 180.081,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 24.673771
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 161,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 162,
+          "price": 188.077,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 9.138857
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 207,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 208,
+          "price": 194.324,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 4.272914
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 223,
+          "type": "swing_high",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 224,
+          "price": 193.049,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 3.547543
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 270,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 271,
+          "price": 184.365,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 13.112143
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 371,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 370,
+          "price": 195.284,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 4.012771
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 450,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 451,
+          "price": 199.821,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 3.978371
+        },
+        "index_distance": 1
+      },
+      {
+        "human": {
+          "index": 219,
+          "type": "swing_low",
+          "importance": "medium"
+        },
+        "algo": {
+          "index": 221,
+          "price": 187.408,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 6.878771
+        },
+        "index_distance": 2
+      }
+    ],
+    "false_positives": [
+      {
+        "algo": {
+          "index": 0,
+          "price": 200.734,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 0.933514
+        }
+      },
+      {
+        "algo": {
+          "index": 14,
+          "price": 201.452,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 1.282829
+        }
+      },
+      {
+        "algo": {
+          "index": 16,
+          "price": 199.4,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 0.882571
+        }
+      },
+      {
+        "algo": {
+          "index": 39,
+          "price": 204.135,
+          "type": "swing_low",
+          "strength": 1,
+          "prominence": 0.790171
+        }
+      },
+      {
+        "algo": {
+          "index": 44,
+          "price": 202.672,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.744371
+        }
+      },
+      {
+        "algo": {
+          "index": 50,
+          "price": 195.854,
+          "type": "swing_low",
+          "strength": 1,
+          "prominence": 1.382143
+        }
+      },
+      {
+        "algo": {
+          "index": 69,
+          "price": 192.005,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 1.079514
+        }
+      },
+      {
+        "algo": {
+          "index": 71,
+          "price": 188.227,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 1.296057
+        }
+      },
+      {
+        "algo": {
+          "index": 104,
+          "price": 194.968,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 3.118429
+        }
+      },
+      {
+        "algo": {
+          "index": 106,
+          "price": 189.951,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 2.860343
+        }
+      },
+      {
+        "algo": {
+          "index": 112,
+          "price": 195.611,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 0.877314
+        }
+      },
+      {
+        "algo": {
+          "index": 121,
+          "price": 193.7,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.951971
+        }
+      },
+      {
+        "algo": {
+          "index": 135,
+          "price": 196.301,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 1.773171
+        }
+      },
+      {
+        "algo": {
+          "index": 139,
+          "price": 199.551,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 1.790314
+        }
+      },
+      {
+        "algo": {
+          "index": 177,
+          "price": 196.786,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 0.926857
+        }
+      },
+      {
+        "algo": {
+          "index": 189,
+          "price": 194.637,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 1.821943
+        }
+      },
+      {
+        "algo": {
+          "index": 192,
+          "price": 198.191,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 2.544743
+        }
+      },
+      {
+        "algo": {
+          "index": 216,
+          "price": 193.165,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 0.702314
+        }
+      },
+      {
+        "algo": {
+          "index": 241,
+          "price": 192.546,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 1.569571
+        }
+      },
+      {
+        "algo": {
+          "index": 245,
+          "price": 188.786,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 1.025143
+        }
+      },
+      {
+        "algo": {
+          "index": 252,
+          "price": 194.898,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 1.539486
+        }
+      },
+      {
+        "algo": {
+          "index": 255,
+          "price": 192.008,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 1.273314
+        }
+      },
+      {
+        "algo": {
+          "index": 277,
+          "price": 189.637,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 0.881657
+        }
+      },
+      {
+        "algo": {
+          "index": 282,
+          "price": 187.459,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.795086
+        }
+      },
+      {
+        "algo": {
+          "index": 291,
+          "price": 193.523,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 2.133229
+        }
+      },
+      {
+        "algo": {
+          "index": 294,
+          "price": 190.23,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 1.205257
+        }
+      },
+      {
+        "algo": {
+          "index": 300,
+          "price": 196.402,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 2.873543
+        }
+      },
+      {
+        "algo": {
+          "index": 308,
+          "price": 191.888,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 2.468629
+        }
+      },
+      {
+        "algo": {
+          "index": 313,
+          "price": 196.311,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 2.544971
+        }
+      },
+      {
+        "algo": {
+          "index": 318,
+          "price": 192.726,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 1.115714
+        }
+      },
+      {
+        "algo": {
+          "index": 327,
+          "price": 194.133,
+          "type": "swing_low",
+          "strength": 1,
+          "prominence": 1.499486
+        }
+      },
+      {
+        "algo": {
+          "index": 329,
+          "price": 196.844,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 0.907486
+        }
+      },
+      {
+        "algo": {
+          "index": 331,
+          "price": 194.008,
+          "type": "swing_low",
+          "strength": 1,
+          "prominence": 1.123629
+        }
+      },
+      {
+        "algo": {
+          "index": 338,
+          "price": 198.801,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 1.322457
+        }
+      },
+      {
+        "algo": {
+          "index": 343,
+          "price": 195.357,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 2.3492
+        }
+      },
+      {
+        "algo": {
+          "index": 356,
+          "price": 199.698,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 0.850886
+        }
+      },
+      {
+        "algo": {
+          "index": 368,
+          "price": 199.514,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 0.734743
+        }
+      },
+      {
+        "algo": {
+          "index": 379,
+          "price": 200.276,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 1.531486
+        }
+      },
+      {
+        "algo": {
+          "index": 393,
+          "price": 197.942,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 1.302429
+        }
+      },
+      {
+        "algo": {
+          "index": 411,
+          "price": 200.047,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 2.526571
+        }
+      },
+      {
+        "algo": {
+          "index": 412,
+          "price": 199.018,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.736857
+        }
+      },
+      {
+        "algo": {
+          "index": 422,
+          "price": 197.486,
+          "type": "swing_low",
+          "strength": 3,
+          "prominence": 2.392286
+        }
+      },
+      {
+        "algo": {
+          "index": 435,
+          "price": 200.675,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 2.2272
+        }
+      },
+      {
+        "algo": {
+          "index": 442,
+          "price": 204.059,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 1.600543
+        }
+      },
+      {
+        "algo": {
+          "index": 445,
+          "price": 200.562,
+          "type": "swing_low",
+          "strength": 1,
+          "prominence": 1.371629
+        }
+      },
+      {
+        "algo": {
+          "index": 464,
+          "price": 206.858,
+          "type": "swing_high",
+          "strength": 1,
+          "prominence": 0.919571
+        }
+      },
+      {
+        "algo": {
+          "index": 470,
+          "price": 207.206,
+          "type": "swing_high",
+          "strength": 3,
+          "prominence": 1.2022
+        }
+      },
+      {
+        "algo": {
+          "index": 473,
+          "price": 205.191,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 0.966971
+        }
+      },
+      {
+        "algo": {
+          "index": 481,
+          "price": 208.895,
+          "type": "swing_high",
+          "strength": 2,
+          "prominence": 0.958657
+        }
+      },
+      {
+        "algo": {
+          "index": 486,
+          "price": 206.765,
+          "type": "swing_low",
+          "strength": 2,
+          "prominence": 1.279429
+        }
+      }
+    ],
+    "false_negatives": []
+  },
+  "trendlines": {
+    "matched": [],
+    "false_positives": [],
+    "false_negatives": []
+  },
+  "pair": "GBPJPY",
+  "timeframe": "D"
+}

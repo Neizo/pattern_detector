@@ -54,6 +54,43 @@ _ZONE_MAX_PRICE_RANGE_FRAC = 0.03  # cap: zone half-width ≤ 3% of visible rang
 _REACTION_ATR = 0.5       # minimum expected bounce after a touch
 _LOOK_AHEAD_BARS = 5      # bars ahead to measure a bounce (capped at current)
 
+# Post-validation merge: levels closer than this are fused (keeps best score)
+_MERGE_DISTANCE_ATR_BY_TF: dict[str, float] = {
+    "M15": 0.60,
+    "M30": 0.60,
+    "H1":  0.80,
+    "H4":  1.00,
+    "D1":  1.20,
+    "W1":  1.20,
+}
+_MERGE_DISTANCE_ATR_DEFAULT = 1.0
+
+# Maximum zone width in ATR — clamp zones that would be wider
+_MAX_ZONE_WIDTH_ATR_BY_TF: dict[str, float] = {
+    "M15": 0.50,
+    "M30": 0.60,
+    "H1":  0.80,
+    "H4":  1.00,
+    "D1":  1.00,
+    "W1":  1.00,
+}
+_MAX_ZONE_WIDTH_ATR_DEFAULT = 1.0
+
+# Minimum temporal clusters — touches must span ≥ 2 distinct time groups
+_MIN_CLUSTER_GAP: dict[str, int] = {
+    "M15": 40,   # ~10 h
+    "M30": 30,   # ~15 h
+    "H1":  20,   # ~20 h
+    "H4":  10,   # ~40 h
+    "D1":  8,    # ~8 days
+    "W1":  4,    # ~4 weeks
+}
+_MIN_CLUSTER_GAP_DEFAULT = 20
+
+# Broken level penalty: if price closed beyond the level between touches
+_BREACH_ATR = 1.0               # close must exceed level by N×ATR to count
+_BREACH_PENALTY_PER_EVENT = 0.35  # each breach reduces score by 35%
+
 # Minimum number of pivots required for a meaningful KDE
 _MIN_KDE_PIVOTS = 4
 
@@ -192,6 +229,11 @@ class LevelDetector:
             if temporal_score < 0.05 and len(touches) < 3:
                 continue
 
+            # Require touches to span ≥ 2 distinct temporal clusters
+            min_gap = _MIN_CLUSTER_GAP.get(timeframe, _MIN_CLUSTER_GAP_DEFAULT)
+            if self._count_temporal_clusters(touches, min_gap) < 2:
+                continue
+
             # Price reaction at each touch (no-lookahead: capped at current)
             reactions = [
                 self._measure_reaction(df, t, current_pivot.index)
@@ -210,6 +252,18 @@ class LevelDetector:
                 current_index=current_pivot.index,
                 lb_start=lb_start,
             )
+
+            # Broken level penalty: penalise levels that were breached
+            # Skip in visual_mode — each pivot acts as current_pivot which
+            # changes the support/resistance direction unreliably.
+            if not visual_mode:
+                breach_count = self._count_breaches(
+                    df, touches, level_price, atr, current_price
+                )
+                if breach_count > 0:
+                    penalty = max(0.0, 1.0 - breach_count * _BREACH_PENALTY_PER_EVENT)
+                    score *= penalty
+
             if score < self._config.get("render_min_confidence", 0.5):
                 continue
 
@@ -259,11 +313,18 @@ class LevelDetector:
                             "color": color,
                             "alpha": 0.10,
                             "x_start_idx": max(touches[0].index, win_start),
+                            "_touch_tol": float(touch_tol),
                         }
                     ],
                 },
             )
             results.append(result)
+
+        # ── 5. Deduplicate levels with identical touch sets ────────────
+        results = self._deduplicate_by_touches(results)
+
+        # ── 6. Merge nearby levels to eliminate KDE fragmentation ─────────
+        results = self._merge_nearby_levels(results, atr, timeframe, current_price)
 
         if results:
             logger.debug(
@@ -324,11 +385,12 @@ class LevelDetector:
     ) -> float:
         """Weighted confidence score (0–1).
 
-        Weights from PATTERNS.md §2:
-            0.30 × normalized_touches
+        Weights:
+            0.20 × normalized_touches
             0.30 × temporal_spread
-            0.20 × avg_reaction_magnitude  (normalised by 2 × ATR)
-            0.20 × recency_factor           (fraction of touches in recent half)
+            0.15 × avg_reaction_magnitude  (normalised by 2 × ATR)
+            0.15 × recency_factor
+            0.20 × pivot_strength   (avg strength: 1→0, 3→1)
         """
         # Touches component: 1 touch above min → small score; 10+ → 1.0
         normalized_touches = min(1.0, (len(touches) - 1) / 9.0)
@@ -347,10 +409,233 @@ class LevelDetector:
         ]
         recency = float(np.mean(recency_scores))
 
+        # Pivot quality: average strength of touch pivots (1=minor → 0, 3=major → 1)
+        avg_strength = float(np.mean([t.strength for t in touches]))
+        strength_score = min(1.0, (avg_strength - 1.0) / 2.0)
+
         score = (
-            0.30 * normalized_touches
+            0.20 * normalized_touches
             + 0.30 * temporal_score
-            + 0.20 * reaction_score
-            + 0.20 * recency
+            + 0.15 * reaction_score
+            + 0.15 * recency
+            + 0.20 * strength_score
         )
         return float(np.clip(score, 0.0, 1.0))
+
+    def _count_temporal_clusters(
+        self, touches: list[Pivot], min_gap_bars: int
+    ) -> int:
+        """Count distinct temporal clusters among *touches*.
+
+        A new cluster starts whenever the gap between consecutive touches
+        (sorted by index) exceeds *min_gap_bars*.
+
+        Returns:
+            Number of clusters (≥ 1 when touches is non-empty).
+        """
+        if len(touches) <= 1:
+            return len(touches)
+        indices = sorted(t.index for t in touches)
+        clusters = 1
+        for i in range(1, len(indices)):
+            if indices[i] - indices[i - 1] > min_gap_bars:
+                clusters += 1
+        return clusters
+
+    def _count_breaches(
+        self,
+        df: pd.DataFrame,
+        touches: list[Pivot],
+        level_price: float,
+        atr: float,
+        current_price: float,
+    ) -> int:
+        """Count how many times price closed beyond the level between touches.
+
+        Only checks the **relevant direction**: if current price is above the
+        level (support), a breach is a close *below* the level.  If current
+        price is below (resistance), a breach is a close *above*.
+
+        Uses close prices (not high/low) so that mere wicks through the level
+        are not penalised.
+
+        Returns:
+            Number of breach events (0 = level was never broken).
+        """
+        if len(touches) < 2:
+            return 0
+
+        sorted_touches = sorted(touches, key=lambda t: t.index)
+        breach_thr = _BREACH_ATR * atr
+        breaches = 0
+        is_support = current_price > level_price
+
+        for i in range(len(sorted_touches) - 1):
+            idx_start = sorted_touches[i].index + 1
+            idx_end = sorted_touches[i + 1].index
+            if idx_end <= idx_start:
+                continue
+            closes = df["close"].iloc[idx_start:idx_end].values
+            if is_support:
+                # Support breach: price closed well below the level
+                if np.any(closes < level_price - breach_thr):
+                    breaches += 1
+            else:
+                # Resistance breach: price closed well above the level
+                if np.any(closes > level_price + breach_thr):
+                    breaches += 1
+
+        return breaches
+
+    def _deduplicate_by_touches(
+        self, results: list[PatternResult]
+    ) -> list[PatternResult]:
+        """Remove levels that share the exact same set of touch indices.
+
+        When two KDE peaks resolve to the same cluster of pivots, keep only
+        the one with the highest confidence.
+        """
+        if len(results) <= 1:
+            return results
+
+        seen: dict[frozenset[int], PatternResult] = {}
+        for r in results:
+            touch_set = frozenset(kp["index"] for kp in r.key_points)
+            if touch_set in seen:
+                if r.confidence > seen[touch_set].confidence:
+                    seen[touch_set] = r
+            else:
+                seen[touch_set] = r
+        return list(seen.values())
+
+    def _merge_nearby_levels(
+        self,
+        results: list[PatternResult],
+        atr: float,
+        timeframe: str = "",
+        current_price: float = 0.0,
+    ) -> list[PatternResult]:
+        """Merge levels whose prices are within a TF-adaptive ATR distance.
+
+        Uses **directional merge**: when two levels are close, the one kept
+        depends on current price position:
+        - Price above both → keep the higher (nearest support).
+        - Price below both → keep the lower (nearest resistance).
+        - Price between    → fall back to highest confidence.
+
+        After merging, zone bounds are recomputed from actual touch prices
+        rather than taking the union of prior zones (which inflated widths).
+
+        Args:
+            results: Validated PatternResult list (may be empty).
+            atr: Current ATR for distance thresholds.
+            timeframe: Timeframe key for adaptive merge distance.
+            current_price: Current close price for directional selection.
+
+        Returns:
+            Deduplicated list of PatternResult, sorted by price.
+        """
+        if len(results) <= 1:
+            return results
+
+        merge_mult = _MERGE_DISTANCE_ATR_BY_TF.get(
+            timeframe, _MERGE_DISTANCE_ATR_DEFAULT
+        )
+        merge_dist = merge_mult * atr
+
+        max_zone_width = _MAX_ZONE_WIDTH_ATR_BY_TF.get(
+            timeframe, _MAX_ZONE_WIDTH_ATR_DEFAULT
+        ) * atr
+
+        # Sort by the hline price
+        def _level_price(r: PatternResult) -> float:
+            return r.annotations["hlines"][0]["price"]
+
+        results.sort(key=_level_price)
+
+        merged: list[PatternResult] = [results[0]]
+        for candidate in results[1:]:
+            prev = merged[-1]
+            p_prev = _level_price(prev)
+            p_cand = _level_price(candidate)
+            if abs(p_cand - p_prev) < merge_dist:
+                # Directional merge: keep the level nearest to price action
+                both_below = current_price > max(p_prev, p_cand)
+                both_above = current_price < min(p_prev, p_cand)
+
+                if both_below:
+                    # Both are supports — keep the higher (nearest to price)
+                    if p_cand > p_prev:
+                        winner, loser = candidate, prev
+                    else:
+                        winner, loser = prev, candidate
+                elif both_above:
+                    # Both are resistances — keep the lower (nearest to price)
+                    if p_cand < p_prev:
+                        winner, loser = candidate, prev
+                    else:
+                        winner, loser = prev, candidate
+                else:
+                    # Price between the two — fall back to confidence
+                    if candidate.confidence > prev.confidence:
+                        winner, loser = candidate, prev
+                    else:
+                        winner, loser = prev, candidate
+
+                # Combine key_points (deduplicate by index)
+                seen_idx = {kp["index"] for kp in winner.key_points}
+                for kp in loser.key_points:
+                    if kp["index"] not in seen_idx:
+                        winner.key_points.append(kp)
+                        seen_idx.add(kp["index"])
+                winner.key_points.sort(key=lambda kp: kp["index"])
+
+                # Recompute hline price as confidence-weighted average
+                w_price = _level_price(winner)
+                l_price = _level_price(loser)
+                total_conf = winner.confidence + loser.confidence
+                if total_conf > 0:
+                    new_price = (
+                        w_price * winner.confidence + l_price * loser.confidence
+                    ) / total_conf
+                else:
+                    new_price = w_price
+                winner.annotations["hlines"][0]["price"] = float(new_price)
+
+                # Recompute zone from actual touch dispersion
+                touch_prices = [kp["price"] for kp in winner.key_points]
+                zone_center = float(np.mean(touch_prices))
+                # Use touch_tol from the winner as half-width basis
+                w_zone = winner.annotations["zones"][0]
+                l_zone = loser.annotations["zones"][0]
+                touch_tol = w_zone.get("_touch_tol", atr * 0.3)
+                zone_half = max(touch_tol, float(np.std(touch_prices)))
+                # Clamp to max zone width
+                zone_half = min(zone_half, max_zone_width / 2.0)
+
+                w_zone["ymin"] = float(zone_center - zone_half)
+                w_zone["ymax"] = float(zone_center + zone_half)
+                w_zone["x_start_idx"] = min(
+                    w_zone.get("x_start_idx", 0),
+                    l_zone.get("x_start_idx", 0),
+                )
+
+                # Update start_index to earliest touch
+                winner.start_index = min(
+                    winner.start_index, loser.start_index
+                )
+
+                merged[-1] = winner
+            else:
+                merged.append(candidate)
+
+        # Final pass: clamp any remaining zones that exceed max width
+        for r in merged:
+            zone = r.annotations["zones"][0]
+            width = zone["ymax"] - zone["ymin"]
+            if width > max_zone_width:
+                center = (zone["ymax"] + zone["ymin"]) / 2.0
+                zone["ymin"] = float(center - max_zone_width / 2.0)
+                zone["ymax"] = float(center + max_zone_width / 2.0)
+
+        return merged

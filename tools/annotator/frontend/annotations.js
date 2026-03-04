@@ -15,6 +15,7 @@ class AnnotationManager {
       trendlines: [],
       pivots: [],
       patterns: [],
+      algo_notes: [],
     };
 
     // Auto-label counters
@@ -615,6 +616,54 @@ class AnnotationManager {
     }
   }
 
+  // ── Algo notes CRUD ────────────────────────────────────────────────
+
+  /**
+   * Find an algo note matching the given zone prices (tolerance 1e-6).
+   */
+  getAlgoNote(zoneTop, zoneBottom) {
+    const tol = 1e-6;
+    return this.annotations.algo_notes.find(
+      n => Math.abs(n.zone_top - zoneTop) < tol && Math.abs(n.zone_bottom - zoneBottom) < tol
+    ) || null;
+  }
+
+  /**
+   * Add or update an algo note. Returns the note object.
+   */
+  addAlgoNote(zoneTop, zoneBottom, type, note) {
+    const existing = this.getAlgoNote(zoneTop, zoneBottom);
+    if (existing) {
+      const oldNote = existing.note;
+      existing.note = note;
+      existing.type = type;
+      this._pushUndo({ action: 'update_algo_note', data: { zone_top: zoneTop, zone_bottom: zoneBottom, old_note: oldNote, new_note: note, type } });
+    } else {
+      const entry = { zone_top: zoneTop, zone_bottom: zoneBottom, type, note };
+      this.annotations.algo_notes.push(entry);
+      this._pushUndo({ action: 'add_algo_note', data: { ...entry }, index: this.annotations.algo_notes.length - 1 });
+    }
+    this.dirty = true;
+    this._updateUI();
+    return this.getAlgoNote(zoneTop, zoneBottom);
+  }
+
+  /**
+   * Remove an algo note by zone prices.
+   */
+  removeAlgoNote(zoneTop, zoneBottom) {
+    const tol = 1e-6;
+    const idx = this.annotations.algo_notes.findIndex(
+      n => Math.abs(n.zone_top - zoneTop) < tol && Math.abs(n.zone_bottom - zoneBottom) < tol
+    );
+    if (idx >= 0) {
+      const removed = this.annotations.algo_notes.splice(idx, 1)[0];
+      this._pushUndo({ action: 'remove_algo_note', data: { ...removed }, index: idx });
+      this.dirty = true;
+      this._updateUI();
+    }
+  }
+
   // ── Undo / Redo ────────────────────────────────────────────────────
 
   _pushUndo(entry) {
@@ -640,6 +689,35 @@ class AnnotationManager {
   }
 
   _applyUndoEntry(entry, isUndo) {
+    // Handle algo note undo/redo separately
+    if (entry.action === 'add_algo_note' || entry.action === 'remove_algo_note') {
+      const shouldAdd = isUndo ? entry.action === 'remove_algo_note' : entry.action === 'add_algo_note';
+      if (shouldAdd) {
+        this.annotations.algo_notes.splice(entry.index, 0, { ...entry.data });
+      } else {
+        const tol = 1e-6;
+        const idx = this.annotations.algo_notes.findIndex(
+          n => Math.abs(n.zone_top - entry.data.zone_top) < tol && Math.abs(n.zone_bottom - entry.data.zone_bottom) < tol
+        );
+        if (idx >= 0) this.annotations.algo_notes.splice(idx, 1);
+      }
+      this.dirty = true;
+      this._updateUI();
+      return;
+    }
+    if (entry.action === 'update_algo_note') {
+      const tol = 1e-6;
+      const note = this.annotations.algo_notes.find(
+        n => Math.abs(n.zone_top - entry.data.zone_top) < tol && Math.abs(n.zone_bottom - entry.data.zone_bottom) < tol
+      );
+      if (note) {
+        note.note = isUndo ? entry.data.old_note : entry.data.new_note;
+      }
+      this.dirty = true;
+      this._updateUI();
+      return;
+    }
+
     // isUndo: true → reverse the action, false → replay it
     const shouldAdd = isUndo ? entry.action === 'remove' : entry.action === 'add';
 
@@ -710,6 +788,12 @@ class AnnotationManager {
           key_points: p.key_points,
           note: p.note,
         })),
+        algo_notes: this.annotations.algo_notes.map(n => ({
+          zone_top: n.zone_top,
+          zone_bottom: n.zone_bottom,
+          type: n.type,
+          note: n.note,
+        })),
       },
     };
   }
@@ -721,7 +805,7 @@ class AnnotationManager {
     this.chart.clearAllLevelZones();
     this.chart.clearAllTrendlines();
     this.chart.setPivotMarkers([]);
-    this.annotations = { levels: [], trendlines: [], pivots: [], patterns: [] };
+    this.annotations = { levels: [], trendlines: [], pivots: [], patterns: [], algo_notes: [] };
     this._labelCounters = { S: 0, R: 0 };
     this.dirty = false;
     this._hideForm();
@@ -769,6 +853,11 @@ class AnnotationManager {
     // Restore patterns
     if (ann.patterns) {
       this.annotations.patterns = ann.patterns.map(p => ({ ...p }));
+    }
+
+    // Restore algo notes
+    if (ann.algo_notes) {
+      this.annotations.algo_notes = ann.algo_notes.map(n => ({ ...n }));
     }
 
     this.dirty = false;

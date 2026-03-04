@@ -14,6 +14,7 @@ def compare(
     human_annotations: dict,
     algo_detections: dict,
     atr_median: float,
+    algo_notes: list[dict] | None = None,
 ) -> dict:
     """Compare human annotations against algo detections.
 
@@ -21,6 +22,7 @@ def compare(
         human_annotations: Dict with keys levels, pivots, trendlines, patterns.
         algo_detections: Dict from DataProvider.get_detections().
         atr_median: Median ATR for distance normalization.
+        algo_notes: Optional list of human notes on algo levels.
 
     Returns:
         Structured comparison report with summary + detail per type.
@@ -35,6 +37,7 @@ def compare(
         human_annotations.get("levels", []),
         algo_detections.get("levels", []),
         atr_median,
+        algo_notes=algo_notes or [],
     )
     report["summary"]["levels"] = _summary(report["levels"])
 
@@ -63,6 +66,7 @@ def _compare_levels(
     human_levels: list[dict],
     algo_levels: list[dict],
     atr: float,
+    algo_notes: list[dict] | None = None,
 ) -> dict:
     """Match algo levels to human zones.
 
@@ -107,12 +111,23 @@ def _compare_levels(
             "distance_to_zone_center_atr": round(dist_center / atr, 4) if atr > 0 else 0,
         })
 
+    # Inject human notes on algo levels
+    notes = algo_notes or []
+    for pair in matched_pairs:
+        note = _find_algo_note(pair["algo"], notes)
+        if note:
+            pair["human_note"] = note
+
     false_positives = []
     for ai, algo in enumerate(algo_levels):
         if ai in matched_algo:
             continue
         nearest = _nearest_human_zone(algo["price"], human_levels, atr)
-        false_positives.append({"algo": algo, "nearest_human_zone": nearest})
+        entry: dict = {"algo": algo, "nearest_human_zone": nearest}
+        note = _find_algo_note(algo, notes)
+        if note:
+            entry["human_note"] = note
+        false_positives.append(entry)
 
     false_negatives = []
     for hi, human in enumerate(human_levels):
@@ -126,6 +141,19 @@ def _compare_levels(
         "false_positives": false_positives,
         "false_negatives": false_negatives,
     }
+
+
+def _find_algo_note(algo_level: dict, notes: list[dict]) -> str | None:
+    """Find a human note matching an algo level by zone prices (tolerance 1e-5)."""
+    tol = 1e-5
+    zt = algo_level.get("zone_top")
+    zb = algo_level.get("zone_bottom")
+    if zt is None or zb is None:
+        return None
+    for n in notes:
+        if abs(n.get("zone_top", 0) - zt) < tol and abs(n.get("zone_bottom", 0) - zb) < tol:
+            return n.get("note")
+    return None
 
 
 def _dist_to_zone(price: float, low: float, high: float) -> float:

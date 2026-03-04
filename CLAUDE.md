@@ -135,6 +135,7 @@ py scripts/test_pivots_visual.py --pair GBPUSD --window 300
 - **Architecture & pipeline** → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **Définition des patterns** → [docs/PATTERNS.md](docs/PATTERNS.md)
 - **Conventions de code** → [docs/CONVENTIONS.md](docs/CONVENTIONS.md)
+- **Guide utilisateur** → [docs/USER_GUIDE.md](docs/USER_GUIDE.md)
 
 ## Pièges à éviter
 - Ne PAS utiliser `df.iloc[-500:]` pour la fenêtre de rendu → utiliser `end_index` du PatternResult
@@ -152,3 +153,4 @@ py scripts/test_pivots_visual.py --pair GBPUSD --window 300
 8. **Seuils adaptatifs** : TOUS les seuils de prix/distance sont exprimés en multiples d'ATR(14), jamais en % fixe (voir PATTERNS.md)
 9. **RANSAC** pour tout fitting linéaire (trendlines, bords de triangles, canaux)
 10. **Savitzky-Golay** uniquement pour le pré-calcul des pivots, pas sur les données brutes
+11. **Mettre à jour `docs/USER_GUIDE.md`** à chaque ajout ou modification de fonctionnalité (nouveau détecteur, nouveau script, nouvel endpoint API, nouveau raccourci clavier, nouveau paramètre de config, etc.)

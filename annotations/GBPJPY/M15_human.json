@@ -1,0 +1,172 @@
+{
+  "pair": "GBPJPY",
+  "timeframe": "M15",
+  "window": {
+    "last_n": 500,
+    "before": "2025-12-31"
+  },
+  "annotations": {
+    "levels": [
+      {
+        "price_high": 210.51621543086173,
+        "price_low": 210.4654138276553,
+        "type": "resistance",
+        "note": "",
+        "start_index": 125
+      },
+      {
+        "price_high": 211.15758567134267,
+        "price_low": 211.08773346693386,
+        "type": "resistance",
+        "note": "",
+        "start_index": 0
+      },
+      {
+        "price_high": 211.4518116232465,
+        "price_low": 211.40101002004008,
+        "type": "resistance",
+        "note": "",
+        "start_index": 109
+      }
+    ],
+    "trendlines": [],
+    "pivots": [
+      {
+        "index": 19,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 32,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 48,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 65,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 73,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 89,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 98,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 117,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 128,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 146,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 163,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 167,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 179,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 188,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 194,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 220,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 250,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 259,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 276,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 289,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 298,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 318,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 333,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 350,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 391,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 443,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 462,
+        "type": "swing_high",
+        "importance": "medium"
+      }
+    ],
+    "patterns": []
+  }
+}

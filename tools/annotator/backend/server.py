@@ -156,6 +156,7 @@ def compare_annotations(
         human_data = json.load(f)
 
     human_annotations = human_data.get("annotations", {})
+    algo_notes = human_annotations.get("algo_notes", [])
 
     # Run algo detections
     try:
@@ -167,7 +168,7 @@ def compare_annotations(
     atr_median = algo_detections.get("atr_median", 0.001)
 
     # Run comparison
-    report = run_comparison(human_annotations, algo_detections, atr_median)
+    report = run_comparison(human_annotations, algo_detections, atr_median, algo_notes=algo_notes)
     report["pair"] = pair
     report["timeframe"] = timeframe
 

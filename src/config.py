@@ -9,7 +9,7 @@ DEFAULT_CONFIG: dict = {
     "pivot_right_bars": 5,
     # Support / Resistance
     "level_tolerance_pct": 0.15,
-    "level_min_touches": 2,
+    "level_min_touches": 3,
     "level_lookback_bars": 600,
     # Trendlines
     "trendline_min_touches": 3,
@@ -17,7 +17,7 @@ DEFAULT_CONFIG: dict = {
     "trendline_lookback_bars": 600,
     # Rendering
     "render_candle_window": 600,
-    "render_min_confidence": 0.5,
+    "render_min_confidence": 0.55,
     "render_dpi": 100,
     "render_figsize": (19.2, 10.8),
     # Pipeline

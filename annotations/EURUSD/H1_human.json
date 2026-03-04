@@ -1,0 +1,242 @@
+{
+  "pair": "EURUSD",
+  "timeframe": "H1",
+  "window": {
+    "last_n": 500,
+    "before": "2025-12-31"
+  },
+  "annotations": {
+    "levels": [
+      {
+        "price_high": 1.1661851102204408,
+        "price_low": 1.165560273046092,
+        "type": "support",
+        "note": "",
+        "start_index": 3
+      },
+      {
+        "price_high": 1.162544754509018,
+        "price_low": 1.1619199173346693,
+        "type": "resistance",
+        "note": "",
+        "start_index": 10
+      },
+      {
+        "price_high": 1.1756391683366734,
+        "price_low": 1.1749871643286574,
+        "type": "resistance",
+        "note": "",
+        "start_index": 194
+      }
+    ],
+    "trendlines": [],
+    "pivots": [
+      {
+        "index": 20,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 92,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 106,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 116,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 174,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 178,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 189,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 208,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 235,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 238,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 258,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 275,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 283,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 304,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 305,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 329,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 375,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 379,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 390,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 63,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 295,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 299,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 296,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 293,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 269,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 244,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 406,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 429,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 386,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 416,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 436,
+        "type": "swing_low",
+        "importance": "medium"
+      }
+    ],
+    "patterns": [],
+    "algo_notes": [
+      {
+        "zone_top": 1.173108,
+        "zone_bottom": 1.172496,
+        "type": "support",
+        "note": "Trop proche d'autre support, si le prix de la dernière bougie est au dessus du levels alors toujours prendre le plus bas sinon toujours prendre le plus haut"
+      },
+      {
+        "zone_top": 1.172814,
+        "zone_bottom": 1.171935,
+        "type": "resistance",
+        "note": "Trop proche d'autre support, si le prix de la dernière bougie est au dessus du levels alors toujours prendre le plus bas sinon toujours prendre le plus haut"
+      },
+      {
+        "zone_top": 1.175733,
+        "zone_bottom": 1.175253,
+        "type": "support",
+        "note": "Pourquoi non mergé avec le plus haut ?"
+      },
+      {
+        "zone_top": 1.176977,
+        "zone_bottom": 1.176103,
+        "type": "support",
+        "note": "Pourquoi non mergé avec le plus haut ?"
+      },
+      {
+        "zone_top": 1.177079,
+        "zone_bottom": 1.176599,
+        "type": "support",
+        "note": "Pourquoi non mergé avec le plus haut ?"
+      },
+      {
+        "zone_top": 1.171014,
+        "zone_bottom": 1.170402,
+        "type": "support",
+        "note": "Magnifique"
+      },
+      {
+        "zone_top": 1.165901,
+        "zone_bottom": 1.165305,
+        "type": "resistance",
+        "note": "Magnifique"
+      },
+      {
+        "zone_top": 1.162269,
+        "zone_bottom": 1.161589,
+        "type": "support",
+        "note": "Magnifique"
+      }
+    ]
+  }
+}

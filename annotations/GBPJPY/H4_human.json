@@ -1,0 +1,51 @@
+{
+  "pair": "GBPJPY",
+  "timeframe": "H4",
+  "window": {
+    "last_n": 500,
+    "before": "2025-12-31"
+  },
+  "annotations": {
+    "levels": [
+      {
+        "price_high": 207.21237219578518,
+        "price_low": 206.9007831407206,
+        "type": "support",
+        "note": "",
+        "start_index": 226
+      },
+      {
+        "price_high": 204.50394425560842,
+        "price_low": 204.00060808973487,
+        "type": "support",
+        "note": "",
+        "start_index": 126
+      },
+      {
+        "price_high": 201.41202209381373,
+        "price_low": 200.98059109449355,
+        "type": "support",
+        "note": "",
+        "start_index": 131
+      }
+    ],
+    "trendlines": [
+      {
+        "points": [
+          {
+            "index": 253,
+            "price": 199.064
+          },
+          {
+            "index": 440,
+            "price": 207.054
+          }
+        ],
+        "type": "ascending",
+        "note": ""
+      }
+    ],
+    "pivots": [],
+    "patterns": []
+  }
+}

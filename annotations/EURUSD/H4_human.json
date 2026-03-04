@@ -1,0 +1,139 @@
+{
+  "pair": "EURUSD",
+  "timeframe": "H4",
+  "window": {
+    "last_n": 500,
+    "before": "2026-01-07"
+  },
+  "annotations": {
+    "levels": [
+      {
+        "price_high": 1.171247875751503,
+        "price_low": 1.1703132064128257,
+        "type": "support",
+        "note": "",
+        "start_index": 162
+      },
+      {
+        "price_high": 1.1562401720351392,
+        "price_low": 1.1546757320644216,
+        "type": "resistance",
+        "note": "",
+        "start_index": 119
+      }
+    ],
+    "trendlines": [],
+    "pivots": [
+      {
+        "index": 174,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 220,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 299,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 384,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 436,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 36,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 66,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 100,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 15,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 78,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 56,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 140,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 156,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 149,
+        "type": "swing_high",
+        "importance": "medium"
+      },
+      {
+        "index": 194,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 252,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 330,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 406,
+        "type": "swing_low",
+        "importance": "medium"
+      },
+      {
+        "index": 453,
+        "type": "swing_low",
+        "importance": "medium"
+      }
+    ],
+    "patterns": [],
+    "algo_notes": [
+      {
+        "zone_top": 1.15976,
+        "zone_bottom": 1.157773,
+        "type": "support",
+        "note": "Niveau non pertinent car a été cassé puis réintégré, le marché semble l'ignorer maintenant"
+      },
+      {
+        "zone_top": 1.171752,
+        "zone_bottom": 1.169746,
+        "type": "support",
+        "note": "Très bien"
+      }
+    ]
+  }
+}

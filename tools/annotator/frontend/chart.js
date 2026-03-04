@@ -29,6 +29,11 @@ class ChartManager {
     this._comparisonSeries = []; // list of { id, topSeries, bottomSeries, labelLine }
     this._comparisonMarkers = [];
 
+    // Algo detection overlays (separate layer)
+    this._algoSeries = [];       // list of { id, topSeries, bottomSeries, labelLine }
+    this._algoMarkersData = [];
+    this._algoVisible = false;
+
     // Annotation visibility toggle
     this._annotationsVisible = true;
 
@@ -618,5 +623,185 @@ class ChartManager {
       const index = this.getCandleIndexByTime(time);
       callback({ index, price });
     });
+  }
+
+  // ── Algo detection overlays ──────────────────────────────────────────
+
+  /**
+   * Add an algo-detected level zone. Separate layer from annotations & comparison.
+   */
+  addAlgoZone(id, priceHigh, priceLow, color, startIndex) {
+    this.removeAlgoZone(id);
+
+    const start = (startIndex != null && startIndex >= 0) ? startIndex : 0;
+    const end = this.lwcCandles.length - 1;
+    if (end < 0) return;
+
+    const topData = [];
+    const bottomData = [];
+    for (let i = start; i <= end; i++) {
+      const t = this.lwcCandles[i].time;
+      topData.push({ time: t, value: priceHigh });
+      bottomData.push({ time: t, value: priceLow });
+    }
+
+    // Top area: fills downward from priceHigh with very subtle tint.
+    // The fill extends to chart bottom but with alpha ~0.06 it's barely
+    // visible — the two border lines define the zone visually.
+    const fillColor = color.replace(/[\d.]+\)$/, '0.0)');
+    const topSeries = this.chart.addAreaSeries({
+      topColor: fillColor,
+      bottomColor: 'rgba(0, 0, 0, 0)',  // fade to transparent at bottom
+      lineColor: color,
+      lineWidth: 1,
+      crosshairMarkerVisible: false,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+    topSeries.setData(topData);
+
+    // Bottom border line (no fill, just the line)
+    const bottomSeries = this.chart.addLineSeries({
+      color,
+      lineWidth: 1,
+      crosshairMarkerVisible: false,
+      priceLineVisible: false,
+      lastValueVisible: false,
+    });
+    bottomSeries.setData(bottomData);
+
+    const midPrice = (priceHigh + priceLow) / 2;
+    const labelLine = this.candleSeries.createPriceLine({
+      price: midPrice,
+      color: 'transparent',
+      lineWidth: 0,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      axisLabelVisible: true,
+      title: id,
+      axisLabelColor: color,
+    });
+
+    this._algoSeries.push({ id, topSeries, bottomSeries, labelLine, priceHigh, priceLow });
+  }
+
+  removeAlgoZone(id) {
+    const idx = this._algoSeries.findIndex(s => s.id === id);
+    if (idx < 0) return;
+    const entry = this._algoSeries[idx];
+    this.chart.removeSeries(entry.topSeries);
+    this.chart.removeSeries(entry.bottomSeries);
+    try { this.candleSeries.removePriceLine(entry.labelLine); } catch (_) {}
+    this._algoSeries.splice(idx, 1);
+  }
+
+  /**
+   * Set algo pivot markers (displayed on lineSeries, like comparison markers).
+   */
+  setAlgoPivotMarkers(markers) {
+    this._algoMarkersData = markers;
+    if (!this._algoVisible) return;
+
+    const lwcMarkers = markers.map(m => {
+      const candle = this.lwcCandles[m.index];
+      if (!candle) return null;
+      const isHigh = m.type === 'swing_high';
+      return {
+        time: candle.time,
+        position: isHigh ? 'aboveBar' : 'belowBar',
+        color: m.color || '#888888',
+        shape: isHigh ? 'arrowDown' : 'arrowUp',
+        text: '',
+      };
+    }).filter(Boolean);
+
+    lwcMarkers.sort((a, b) => a.time - b.time);
+    this.lineSeries.setMarkers(lwcMarkers);
+  }
+
+  /**
+   * Clear all algo detection overlays.
+   */
+  clearAlgo() {
+    for (const entry of [...this._algoSeries]) {
+      this.removeAlgoZone(entry.id);
+    }
+    this._algoMarkersData = [];
+    this._algoVisible = false;
+    // Clear lineSeries markers only if comparison isn't using them
+    if (!this._comparisonMarkers.length) {
+      this.lineSeries.setMarkers([]);
+    }
+  }
+
+  /**
+   * Toggle visibility of all algo overlays.
+   */
+  setAlgoVisible(visible) {
+    this._algoVisible = visible;
+
+    for (const entry of this._algoSeries) {
+      entry.topSeries.applyOptions({ visible });
+      entry.bottomSeries.applyOptions({ visible });
+      if (!visible && entry.labelLine) {
+        try { this.candleSeries.removePriceLine(entry.labelLine); } catch (_) {}
+        entry._labelHidden = true;
+      } else if (visible && entry._labelHidden) {
+        const midPrice = (entry.priceHigh + entry.priceLow) / 2;
+        const color = entry.id.startsWith('algo_S')
+          ? 'rgba(38, 166, 154, 0.4)'
+          : 'rgba(239, 83, 80, 0.4)';
+        entry.labelLine = this.candleSeries.createPriceLine({
+          price: midPrice,
+          color: 'transparent',
+          lineWidth: 0,
+          lineStyle: LightweightCharts.LineStyle.Solid,
+          axisLabelVisible: true,
+          title: entry.id,
+          axisLabelColor: color,
+        });
+        entry._labelHidden = false;
+      }
+    }
+
+    // Toggle pivot markers on lineSeries
+    if (visible && this._algoMarkersData.length) {
+      this.setAlgoPivotMarkers(this._algoMarkersData);
+    } else if (!visible) {
+      if (!this._comparisonMarkers.length) {
+        this.lineSeries.setMarkers([]);
+      }
+    }
+  }
+
+  /**
+   * Find an algo zone whose price range contains the given price.
+   * Returns {id, priceHigh, priceLow} or null.
+   */
+  getAlgoZoneAtPrice(price) {
+    if (!this._algoVisible) return null;
+    for (const entry of this._algoSeries) {
+      if (price >= entry.priceLow && price <= entry.priceHigh) {
+        return { id: entry.id, priceHigh: entry.priceHigh, priceLow: entry.priceLow };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Update an algo zone's visual style to indicate it has a note.
+   */
+  highlightAlgoZone(id, hasNote) {
+    const entry = this._algoSeries.find(s => s.id === id);
+    if (!entry) return;
+
+    const isSupport = id.startsWith('algo_S');
+    const baseAlpha = hasNote ? 0.65 : 0.4;
+    const color = isSupport
+      ? `rgba(38, 166, 154, ${baseAlpha})`
+      : `rgba(239, 83, 80, ${baseAlpha})`;
+
+    entry.topSeries.applyOptions({ lineColor: color });
+    entry.bottomSeries.applyOptions({ color });
+    entry._hasNote = hasNote;
   }
 }

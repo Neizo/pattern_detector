@@ -1,0 +1,19 @@
+Voici les résultats de comparaison entre ma détection manuelle 
+et mon algo de détection de levels S/R sur 6 cas différents.
+
+tu trouveras les fichiers de comapraison dans @annotations/{PAIR}/*_comparaison.json
+tu peut lire le fichier @src/detection/levels.py
+tu peut lire le fichier @src/detection/config.py
+
+Analyse les faux positifs de l'algo à travers tous les cas.
+Identifie les patterns récurrents : est-ce que les FP ont 
+systématiquement des scores bas sur certains critères ? 
+Des touches groupées dans le temps ? Une faible réaction du prix ?
+
+Puis analyse les faux négatifs : pourquoi l'algo les rate-t-il ?
+Le KDE ne voit pas ces zones ? Les pivots sont absents ? 
+Le seuil de touches est trop strict ?
+
+Propose des modifications concrètes à levels.py et config.py 
+avec les nouvelles règles de filtrage, en expliquant quelle 
+catégorie de FP/FN chaque modification adresse.
