@@ -15,18 +15,25 @@
         "start_index": 125
       },
       {
-        "price_high": 211.15758567134267,
-        "price_low": 211.08773346693386,
-        "type": "resistance",
-        "note": "",
-        "start_index": 0
-      },
-      {
         "price_high": 211.4518116232465,
         "price_low": 211.40101002004008,
         "type": "resistance",
         "note": "",
         "start_index": 109
+      },
+      {
+        "price_high": 210.78038872620792,
+        "price_low": 210.72162225475842,
+        "type": "resistance",
+        "note": "",
+        "start_index": 150
+      },
+      {
+        "price_high": 211.12989458272327,
+        "price_low": 211.0711281112738,
+        "type": "resistance",
+        "note": "",
+        "start_index": 41
       }
     ],
     "trendlines": [],
@@ -167,6 +174,32 @@
         "importance": "medium"
       }
     ],
-    "patterns": []
+    "patterns": [],
+    "algo_notes": [
+      {
+        "zone_top": 210.63893,
+        "zone_bottom": 210.572957,
+        "type": "resistance",
+        "note": "Il est cassé et réintegré beaucoup de fois, de plus il n'est pas pertinent par rapport a celui plus bas vers les 210.54-210.44"
+      },
+      {
+        "zone_top": 210.53885,
+        "zone_bottom": 210.43745,
+        "type": "support",
+        "note": "Un peu gros mais bien"
+      },
+      {
+        "zone_top": 211.085995,
+        "zone_bottom": 211.01338,
+        "type": "resistance",
+        "note": "Parfait"
+      },
+      {
+        "zone_top": 210.785405,
+        "zone_bottom": 210.739524,
+        "type": "resistance",
+        "note": "Parfait"
+      }
+    ]
   }
 }

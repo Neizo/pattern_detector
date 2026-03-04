@@ -2,11 +2,11 @@
   "atr_median": 0.124849,
   "summary": {
     "levels": {
-      "matched": 2,
-      "false_positives": 2,
+      "matched": 3,
+      "false_positives": 1,
       "false_negatives": 1,
-      "precision": 0.5,
-      "recall": 0.6667
+      "precision": 0.75,
+      "recall": 0.75
     },
     "pivots": {
       "matched": 23,
@@ -34,17 +34,29 @@
           "start_index": 125
         },
         "algo": {
-          "price": 210.463946,
+          "price": 210.48815,
           "type": "support",
-          "confidence": 0.7785,
-          "touches": 4,
-          "zone_top": 210.485409,
-          "zone_bottom": 210.442483,
-          "start_index": 85,
+          "confidence": 0.7821,
+          "touches": 8,
+          "zone_top": 210.53885,
+          "zone_bottom": 210.43745,
+          "start_index": 32,
           "key_points": [
+            {
+              "index": 32,
+              "price": 210.509
+            },
+            {
+              "index": 66,
+              "price": 210.516
+            },
             {
               "index": 85,
               "price": 210.448
+            },
+            {
+              "index": 129,
+              "price": 210.487
             },
             {
               "index": 318,
@@ -57,27 +69,65 @@
             {
               "index": 445,
               "price": 210.46
+            },
+            {
+              "index": 473,
+              "price": 210.506
             }
           ]
         },
-        "algo_inside_zone": false,
-        "distance_to_zone_center_atr": 0.2152
+        "algo_inside_zone": true,
+        "distance_to_zone_center_atr": 0.0213
       },
       {
         "human": {
-          "price_high": 211.15758567134267,
-          "price_low": 211.08773346693386,
+          "price_high": 210.78038872620792,
+          "price_low": 210.72162225475842,
           "type": "resistance",
           "note": "",
-          "start_index": 0
+          "start_index": 150
         },
         "algo": {
-          "price": 211.051301,
+          "price": 210.762464,
           "type": "resistance",
-          "confidence": 0.7799,
+          "confidence": 0.7992,
+          "touches": 3,
+          "zone_top": 210.785405,
+          "zone_bottom": 210.739524,
+          "start_index": 72,
+          "key_points": [
+            {
+              "index": 72,
+              "price": 210.767
+            },
+            {
+              "index": 98,
+              "price": 210.752
+            },
+            {
+              "index": 289,
+              "price": 210.767
+            }
+          ]
+        },
+        "algo_inside_zone": true,
+        "distance_to_zone_center_atr": 0.0918
+      },
+      {
+        "human": {
+          "price_high": 211.12989458272327,
+          "price_low": 211.0711281112738,
+          "type": "resistance",
+          "note": "",
+          "start_index": 41
+        },
+        "algo": {
+          "price": 211.049688,
+          "type": "resistance",
+          "confidence": 0.7561,
           "touches": 4,
-          "zone_top": 211.080329,
-          "zone_bottom": 211.022274,
+          "zone_top": 211.085995,
+          "zone_bottom": 211.01338,
           "start_index": 18,
           "key_points": [
             {
@@ -99,18 +149,18 @@
           ]
         },
         "algo_inside_zone": false,
-        "distance_to_zone_center_atr": 0.5716
+        "distance_to_zone_center_atr": 0.4071
       }
     ],
     "false_positives": [
       {
         "algo": {
-          "price": 210.596262,
-          "type": "support",
-          "confidence": 0.7554,
+          "price": 210.605944,
+          "type": "resistance",
+          "confidence": 0.7107,
           "touches": 3,
-          "zone_top": 210.616295,
-          "zone_bottom": 210.57623,
+          "zone_top": 210.63893,
+          "zone_bottom": 210.572957,
           "start_index": 162,
           "key_points": [
             {
@@ -130,37 +180,7 @@
         "nearest_human_zone": {
           "price_high": 210.51621543086173,
           "price_low": 210.4654138276553,
-          "distance_to_nearest_edge_atr": 0.6411
-        }
-      },
-      {
-        "algo": {
-          "price": 210.762464,
-          "type": "resistance",
-          "confidence": 0.7453,
-          "touches": 3,
-          "zone_top": 210.785405,
-          "zone_bottom": 210.739524,
-          "start_index": 72,
-          "key_points": [
-            {
-              "index": 72,
-              "price": 210.767
-            },
-            {
-              "index": 98,
-              "price": 210.752
-            },
-            {
-              "index": 289,
-              "price": 210.767
-            }
-          ]
-        },
-        "nearest_human_zone": {
-          "price_high": 210.51621543086173,
-          "price_low": 210.4654138276553,
-          "distance_to_nearest_edge_atr": 1.9724
+          "distance_to_nearest_edge_atr": 0.7187
         }
       }
     ],
@@ -174,8 +194,8 @@
           "start_index": 109
         },
         "nearest_algo": {
-          "price": 211.051301,
-          "distance_to_zone_edge_atr": 2.8011
+          "price": 211.049688,
+          "distance_to_zone_edge_atr": 2.814
         }
       }
     ]

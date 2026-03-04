@@ -190,52 +190,34 @@
     "patterns": [],
     "algo_notes": [
       {
-        "zone_top": 1.173108,
-        "zone_bottom": 1.172496,
-        "type": "support",
-        "note": "Trop proche d'autre support, si le prix de la dernière bougie est au dessus du levels alors toujours prendre le plus bas sinon toujours prendre le plus haut"
-      },
-      {
-        "zone_top": 1.172814,
-        "zone_bottom": 1.171935,
-        "type": "resistance",
-        "note": "Trop proche d'autre support, si le prix de la dernière bougie est au dessus du levels alors toujours prendre le plus bas sinon toujours prendre le plus haut"
-      },
-      {
         "zone_top": 1.175733,
         "zone_bottom": 1.175253,
         "type": "support",
         "note": "Pourquoi non mergé avec le plus haut ?"
       },
       {
-        "zone_top": 1.176977,
-        "zone_bottom": 1.176103,
+        "zone_top": 1.176968,
+        "zone_bottom": 1.175813,
         "type": "support",
-        "note": "Pourquoi non mergé avec le plus haut ?"
+        "note": "Très bien"
       },
       {
-        "zone_top": 1.177079,
-        "zone_bottom": 1.176599,
+        "zone_top": 1.171393,
+        "zone_bottom": 1.170238,
         "type": "support",
-        "note": "Pourquoi non mergé avec le plus haut ?"
+        "note": "Très bien"
       },
       {
-        "zone_top": 1.171014,
-        "zone_bottom": 1.170402,
+        "zone_top": 1.166202,
+        "zone_bottom": 1.165089,
         "type": "support",
-        "note": "Magnifique"
+        "note": "Très bien"
       },
       {
-        "zone_top": 1.165901,
-        "zone_bottom": 1.165305,
-        "type": "resistance",
-        "note": "Magnifique"
-      },
-      {
-        "zone_top": 1.162269,
-        "zone_bottom": 1.161589,
+        "zone_top": 1.16272,
+        "zone_bottom": 1.161565,
         "type": "support",
-        "note": "Magnifique"
+        "note": "Très bien"
       }
     ]
   }

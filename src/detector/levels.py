@@ -58,7 +58,7 @@ _LOOK_AHEAD_BARS = 5      # bars ahead to measure a bounce (capped at current)
 _MERGE_DISTANCE_ATR_BY_TF: dict[str, float] = {
     "M15": 0.60,
     "M30": 0.60,
-    "H1":  0.80,
+    "H1":  1.00,
     "H4":  1.00,
     "D1":  1.20,
     "W1":  1.20,

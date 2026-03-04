@@ -3,9 +3,9 @@
   "summary": {
     "levels": {
       "matched": 3,
-      "false_positives": 4,
+      "false_positives": 3,
       "false_negatives": 2,
-      "precision": 0.4286,
+      "precision": 0.5,
       "recall": 0.6
     },
     "pivots": {
@@ -36,7 +36,7 @@
         "algo": {
           "price": 207.952006,
           "type": "support",
-          "confidence": 0.8693,
+          "confidence": 0.849,
           "touches": 8,
           "zone_top": 208.08217,
           "zone_bottom": 207.821842,
@@ -90,7 +90,7 @@
         "algo": {
           "price": 208.860273,
           "type": "resistance",
-          "confidence": 0.5698,
+          "confidence": 0.6253,
           "touches": 4,
           "zone_top": 208.98189,
           "zone_bottom": 208.738656,
@@ -128,7 +128,7 @@
         "algo": {
           "price": 207.296369,
           "type": "support",
-          "confidence": 0.6884,
+          "confidence": 0.7566,
           "touches": 3,
           "zone_top": 207.403796,
           "zone_bottom": 207.188943,
@@ -157,7 +157,7 @@
         "algo": {
           "price": 211.091844,
           "type": "resistance",
-          "confidence": 0.8146,
+          "confidence": 0.7549,
           "touches": 6,
           "zone_top": 211.189142,
           "zone_bottom": 210.994546,
@@ -197,9 +197,39 @@
       },
       {
         "algo": {
+          "price": 206.791108,
+          "type": "support",
+          "confidence": 0.7054,
+          "touches": 3,
+          "zone_top": 206.87751,
+          "zone_bottom": 206.704706,
+          "start_index": 52,
+          "key_points": [
+            {
+              "index": 52,
+              "price": 206.874
+            },
+            {
+              "index": 100,
+              "price": 206.745
+            },
+            {
+              "index": 249,
+              "price": 206.765
+            }
+          ]
+        },
+        "nearest_human_zone": {
+          "price_high": 207.2530260521042,
+          "price_low": 207.0879509018036,
+          "distance_to_nearest_edge_atr": 1.2215
+        }
+      },
+      {
+        "algo": {
           "price": 210.460267,
           "type": "support",
-          "confidence": 0.7225,
+          "confidence": 0.6931,
           "touches": 5,
           "zone_top": 210.528526,
           "zone_bottom": 210.392008,
@@ -231,66 +261,6 @@
           "price_high": 210.34228957915832,
           "price_low": 210.17721442885772,
           "distance_to_nearest_edge_atr": 0.4855
-        }
-      },
-      {
-        "algo": {
-          "price": 208.631703,
-          "type": "resistance",
-          "confidence": 0.6952,
-          "touches": 3,
-          "zone_top": 208.711594,
-          "zone_bottom": 208.551811,
-          "start_index": 133,
-          "key_points": [
-            {
-              "index": 133,
-              "price": 208.614
-            },
-            {
-              "index": 179,
-              "price": 208.653
-            },
-            {
-              "index": 299,
-              "price": 208.552
-            }
-          ]
-        },
-        "nearest_human_zone": {
-          "price_high": 208.92735971943887,
-          "price_low": 208.71512024048096,
-          "distance_to_nearest_edge_atr": 0.3433
-        }
-      },
-      {
-        "algo": {
-          "price": 206.791108,
-          "type": "support",
-          "confidence": 0.6646,
-          "touches": 3,
-          "zone_top": 206.87751,
-          "zone_bottom": 206.704706,
-          "start_index": 52,
-          "key_points": [
-            {
-              "index": 52,
-              "price": 206.874
-            },
-            {
-              "index": 100,
-              "price": 206.745
-            },
-            {
-              "index": 249,
-              "price": 206.765
-            }
-          ]
-        },
-        "nearest_human_zone": {
-          "price_high": 207.2530260521042,
-          "price_low": 207.0879509018036,
-          "distance_to_nearest_edge_atr": 1.2215
         }
       }
     ],

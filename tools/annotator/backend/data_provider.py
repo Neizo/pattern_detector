@@ -14,7 +14,7 @@ from src.loader.csv_loader import CSVLoader
 from src.enricher import Enricher
 from src.config import DEFAULT_CONFIG
 from src.detector.pivots import PivotDetector, PivotStore
-from src.detector.levels import LevelDetector
+from src.detector.levels import LevelDetector, _MERGE_DISTANCE_ATR_BY_TF, _MERGE_DISTANCE_ATR_DEFAULT
 from src.detector.trendlines import TrendlineDetector
 
 # Map CSV file stems to canonical timeframe keys used by detectors
@@ -177,10 +177,12 @@ class DataProvider:
             except Exception:
                 continue
 
-        # Deduplicate levels by price (keep highest confidence)
+        # Deduplicate levels using TF-adaptive merge distance + directional merge
         atr_median = float(df["atr"].iloc[win_start_abs:win_end_abs + 1].median())
-        dedup_tol = atr_median * 0.3 if atr_median > 0 else 0.001
-        levels_out = self._dedup_levels(raw_levels, dedup_tol, win_start_abs)
+        current_price = float(df["close"].iloc[win_end_abs])
+        merge_mult = _MERGE_DISTANCE_ATR_BY_TF.get(tf_key, _MERGE_DISTANCE_ATR_DEFAULT)
+        dedup_tol = atr_median * merge_mult if atr_median > 0 else 0.001
+        levels_out = self._dedup_levels(raw_levels, dedup_tol, win_start_abs, current_price)
 
         # ── Trendlines (stub — returns [] until implemented) ─────────────
         trendlines_out: list = []
@@ -199,30 +201,81 @@ class DataProvider:
         raw_levels: list,
         tolerance: float,
         win_start_abs: int,
+        current_price: float = 0.0,
     ) -> list[dict]:
-        """Deduplicate levels by price proximity, keeping highest confidence."""
+        """Deduplicate levels by price proximity with directional merge.
+
+        Sorts by price (like LevelDetector._merge_nearby_levels) so that
+        adjacent levels are compared sequentially.  When two levels are
+        within *tolerance*, the winner depends on current price position:
+        - Price above both → keep the higher (nearest support).
+        - Price below both → keep the lower (nearest resistance).
+        - Price between    → keep the highest confidence.
+        """
         if not raw_levels:
             return []
 
-        # Sort by confidence descending
-        raw_levels.sort(key=lambda r: r.confidence, reverse=True)
-        kept: list[dict] = []
-        used_prices: list[float] = []
-
+        # Build list with prices, filter out results without hlines
+        candidates: list[tuple[float, object]] = []
         for result in raw_levels:
-            # Extract the level price from annotations
             hlines = result.annotations.get("hlines", [])
             if not hlines:
                 continue
+            candidates.append((hlines[0]["price"], result))
+
+        if not candidates:
+            return []
+
+        # Sort by price ascending — adjacent items are natural merge candidates
+        candidates.sort(key=lambda c: c[0])
+
+        # Each group tracks (winner_price, winner_result, group_high_price)
+        # group_high_price is the highest price absorbed into this group,
+        # used to check if the next candidate is within tolerance of the
+        # group even if the winner price is lower (directional merge).
+        merged: list[tuple[float, object, float]] = [
+            (candidates[0][0], candidates[0][1], candidates[0][0])
+        ]
+
+        for price, result in candidates[1:]:
+            winner_price, winner_result, group_high = merged[-1]
+            # Compare against the group high (not just winner) to handle
+            # cases where directional merge keeps a low price but the
+            # group has absorbed higher prices.
+            dist = price - group_high  # candidates sorted asc, so always >= 0
+
+            if dist < tolerance:
+                # Directional merge
+                both_below = current_price > max(price, winner_price)
+                both_above = current_price < min(price, winner_price)
+
+                new_high = max(group_high, price)
+                if both_below:
+                    # Both supports — keep the higher (nearest to price)
+                    if price > winner_price:
+                        merged[-1] = (price, result, new_high)
+                    else:
+                        merged[-1] = (winner_price, winner_result, new_high)
+                elif both_above:
+                    # Both resistances — keep the lower (nearest to price)
+                    if price < winner_price:
+                        merged[-1] = (price, result, new_high)
+                    else:
+                        merged[-1] = (winner_price, winner_result, new_high)
+                else:
+                    # Price between — keep higher confidence
+                    if result.confidence > winner_result.confidence:
+                        merged[-1] = (price, result, new_high)
+                    else:
+                        merged[-1] = (winner_price, winner_result, new_high)
+            else:
+                merged.append((price, result, price))
+
+        # Convert to output dicts
+        out: list[dict] = []
+        for _, result, _ in merged:
+            hlines = result.annotations.get("hlines", [])
             level_price = hlines[0]["price"]
-
-            # Check if a similar price is already kept
-            if any(abs(level_price - up) < tolerance for up in used_prices):
-                continue
-
-            used_prices.append(level_price)
-
-            # Build zone bounds from annotations
             zones = result.annotations.get("zones", [])
             zone_top = level_price + tolerance
             zone_bottom = level_price - tolerance
@@ -230,7 +283,7 @@ class DataProvider:
                 zone_top = zones[0].get("ymax", zone_top)
                 zone_bottom = zones[0].get("ymin", zone_bottom)
 
-            kept.append({
+            out.append({
                 "price": round(level_price, 6),
                 "type": result.pattern_type.value,
                 "confidence": round(result.confidence, 4),
@@ -247,7 +300,7 @@ class DataProvider:
                 ],
             })
 
-        return kept
+        return out
 
     def _load_enriched(self, pair: str, timeframe: str) -> pd.DataFrame:
         """Load and cache enriched DataFrame."""
